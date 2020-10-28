@@ -1,0 +1,10 @@
+#+TITLE: CSC 4320 Project
+#+AUTHOR: Ulysses Carlos
+#+DATE: <2020-08-31 Mon>
+#+OPTIONS: toc:nil
+* CSC 4320 Project
+** Description
+[Insert Project Description]
+** Build Information
+You can compile this project by doing the following:
+
