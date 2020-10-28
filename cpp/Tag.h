@@ -105,7 +105,6 @@ std::ostream& operator<<(std::ostream& os, const Database_Track &dt){
     
 }
 
-
 std::map<enum Database_TagList, std::string> default_taglist() {
     static std::map<enum Database_TagList, std::string> tl;
     tl[title] = "Unknown Track";
