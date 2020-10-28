@@ -1,0 +1,36 @@
+#+title: CSC 4320 Project 2 Planning
+#+author: Ulysses Carlos
+
+* TODO Milestones
+** Setup Database
+
+*** What Database are you going to use?
+At this point, I see that I should go ahead and use SQLite
+*** TODO I need some form of tag reader
+**** Taglib (C++)
++ Fast
++ No dependencies
++ Supports MP3, Vorbis, Flac, MPC, Speex, WavPack, TrueAudio, WAV, AIFF, MP4 and ASF
+- Requires a bridge between java and c++
+**** ealvatag (Java)
++ Written in Java
++ Supports MP3, Flac, Vorbis, Mp4, Aiff, Wav, Wma, and DSF
+- Requires Dependencies to run
+- Slower  
+*** How should audio data be stored in a database?
+- ID - incrementing uint32_t, each track has a unique id.
+- Track Title -- Variable String
+- Track Number -- int32_t
+- Artist Name -- Variable String
+- Album Artist Name -- Variable String
+- Album Name -- Variable String
+- Year -- either uint16_t or uint32_t
+- location in file_path -- Variable String
+*** TODO Setup a database connector
+** Test Audio playback
+*** Read about MediaPlayer and how it works
+** Test File System Navigation
+
+* Activities needed
+* Database Details
+* Multithreading
