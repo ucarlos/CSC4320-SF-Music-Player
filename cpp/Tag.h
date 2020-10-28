@@ -41,8 +41,12 @@ public:
 	  file_path{filepath} { populate_tags(); }
     
     Database_Track(const std::string filepath,
-		   const std::map<enum Database_TagList, std::string> &tl)
-	: file_path{filepath}, tag_list{tl} { populate_tags(); }
+		   const std::map<enum Database_TagList,
+		   std::string> &tl,
+		   std::uint32_t yeer,
+		   std::uint32_t track_n)
+	: file_path{filepath}, tag_list{tl}, year{yeer}, track_num{track_n}
+	{ populate_tags(); }
 
     Database_Track(const std::string filepath, const TagLib::Tag &tag);
 
