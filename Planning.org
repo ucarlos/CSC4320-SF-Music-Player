@@ -12,6 +12,7 @@ At this point, I see that I should go ahead and use SQLite
 + No dependencies
 + Supports MP3, Vorbis, Flac, MPC, Speex, WavPack, TrueAudio, WAV, AIFF, MP4 and ASF
 - Requires a bridge between java and c++
+- Has be to connected to Android somehow
 **** ealvatag (Java)
 + Written in Java
 + Supports MP3, Flac, Vorbis, Mp4, Aiff, Wav, Wma, and DSF
