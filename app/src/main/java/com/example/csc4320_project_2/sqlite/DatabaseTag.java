@@ -1,4 +1,4 @@
-package com.example.csc4320_project_2.taglib;
+package com.example.csc4320_project_2.sqlite;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;

@@ -1,14 +1,11 @@
 package com.example.csc4320_project_2;
 
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
 
-import com.example.csc4320_project_2.taglib.DatabaseTag;
+import com.example.csc4320_project_2.sqlite.DatabaseTag;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -28,9 +25,6 @@ import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.TagException;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 
 public class MainActivity extends AppCompatActivity {
 
