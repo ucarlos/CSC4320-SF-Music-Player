@@ -1,6 +1,8 @@
 package com.example.csc4320_project_2.taglib;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +33,7 @@ public class DatabaseTag {
 
         ArrayList<Byte> read_buffer = new ArrayList<>();
         int bytes_read;
-        while ((bytes_read = is.read(temp_byte)) != -1){
+        while (is.read(temp_byte) != -1){
             read_buffer.add(temp_byte[0]);
         }
 
@@ -45,7 +47,11 @@ public class DatabaseTag {
         file = File.createTempFile("Temp_File", ".ogg");
         OutputStream os = new FileOutputStream(file);
         os.write(output_buffer);
+        os.close();
+        is.close();
+
         audio_file = AudioFileIO.read(file);
+
 
     }
 
@@ -72,6 +78,7 @@ public class DatabaseTag {
 
 
     }
+
     // Private Section
     private String file_path;
     private AudioFile audio_file;
