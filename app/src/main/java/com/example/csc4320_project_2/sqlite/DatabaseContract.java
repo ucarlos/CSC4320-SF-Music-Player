@@ -48,7 +48,7 @@ public class DatabaseContract {
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TrackEntry.TABLE_NAME;
 
-    public class TrackEntryDBHelper extends SQLiteOpenHelper {
+    public static class TrackEntryDBHelper extends SQLiteOpenHelper {
         // If you change the database schema, you must increment the database version.
         public static final int DATABASE_VERSION = 1;
         public static final String DATABASE_NAME = "TrackEntry.db";

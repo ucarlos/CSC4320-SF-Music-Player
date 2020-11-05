@@ -1,10 +1,14 @@
 package com.example.csc4320_project_2;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.view.View;
 import android.view.Menu;
 
+import com.example.csc4320_project_2.sqlite.DatabaseContract;
 import com.example.csc4320_project_2.sqlite.DatabaseTag;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -39,6 +43,38 @@ public class MainActivity extends AppCompatActivity {
         // Test Taglib Here:
         DatabaseTag dt = new DatabaseTag(getApplicationContext());
         dt.print_tags();
+
+        System.out.println("****************************************************************");
+        System.out.println("INSERT TAG INTO DATABASE!");
+        System.out.println("****************************************************************");
+        dt.insert_into_database();
+        // Now check if it exists:
+        DatabaseContract.TrackEntryDBHelper dbHelper =
+                new DatabaseContract.TrackEntryDBHelper(getApplicationContext());
+        SQLiteDatabase database = dbHelper.getReadableDatabase();
+
+        String selection = DatabaseContract.TrackEntry.COLUMN_TRACK_NAME + " = ?";
+        String selection_args[] = { "Default Audio Track"};
+
+        String projection[] = { BaseColumns._ID, DatabaseContract.TrackEntry.COLUMN_TRACK_NAME };
+        String SortOrder = DatabaseContract.TrackEntry.COLUMN_TRACK_NAME + " DESC";
+        Cursor cursor = database.query(
+                DatabaseContract.TrackEntry.TABLE_NAME,   // The table to query
+                projection,             // The array of columns to return (pass null to get all)
+                selection,              // The columns for the WHERE clause
+                selection_args,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                SortOrder              // The sort order
+        );
+
+        while (cursor.moveToNext()) {
+            String temp = cursor.getString(
+                    cursor.getColumnIndexOrThrow(DatabaseContract.TrackEntry.COLUMN_TRACK_NAME));
+            System.out.println("Results : " + temp);
+        }
+
+        dt.delete_temp_file();
 
         System.out.println("****************************************************************");
         System.out.println("NOW CARRY ON!");

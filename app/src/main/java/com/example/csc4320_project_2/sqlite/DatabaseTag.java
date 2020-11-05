@@ -1,7 +1,8 @@
 package com.example.csc4320_project_2.sqlite;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.content.res.Resources;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,12 +23,13 @@ import org.jaudiotagger.tag.TagException;
 public class DatabaseTag {
     // Public Section
 
-    public DatabaseTag(Context context) throws IOException, TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException {
-        // Acess Information in assets/
-        my_context = context;
-        AssetManager am = my_context.getAssets();
+    public DatabaseTag(Context context) throws IOException, TagException, ReadOnlyFileException,
+            CannotReadException, InvalidAudioFrameException {
+        // Access Information in assets/
+        passed_context = context;
+        AssetManager am = passed_context.getAssets();
         InputStream is = am.open("default_audio_file.ogg");
-        // Now create a file out of it:
+        // Now create a file out of it (Inefficiently)
 
         byte temp_byte[] = new byte[1];
 
@@ -49,19 +51,33 @@ public class DatabaseTag {
         os.write(output_buffer);
         os.close();
         is.close();
+        file_path = file.getAbsolutePath();
 
+
+        // This is obviously a invalid file.
+        is_invalid = true;
         audio_file = AudioFileIO.read(file);
 
+        // Setup the database:
+        database_helper = new DatabaseContract.TrackEntryDBHelper(passed_context);
 
     }
 
-    public DatabaseTag(String file_path) throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
+    public DatabaseTag(Context context, String file_path) throws TagException,
+            ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
+        this.passed_context = context;
+        database_helper = new DatabaseContract.TrackEntryDBHelper(passed_context);
         this.file_path = file_path;
+
+        // Assume that the file is not a test or temp file. That's why the first constructor
+        // exists.
+        is_invalid = false;
         audio_file = AudioFileIO.read(new File(file_path));
     }
 
     public final AudioFile get_audio_file() { return audio_file; }
     public final String get_file_path() { return file_path; }
+    public final boolean is_temp_file() { return is_invalid; }
 
     public void print_tags() {
         Tag tag = audio_file.getTag();
@@ -79,9 +95,58 @@ public class DatabaseTag {
 
     }
 
+    /*
+     * -----------------------------------------------------------------------------
+     * insert_into_database(): Insert all applicable tags from AudioFile into
+     * the SQLite Database.
+     *
+     * -----------------------------------------------------------------------------
+     */
+    public void insert_into_database() {
+
+
+        SQLiteDatabase database = database_helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        Tag tag = audio_file.getTag();
+        values.put(DatabaseContract.TrackEntry.COLUMN_TRACK_NAME, tag.getFirst(FieldKey.TITLE));
+        values.put(DatabaseContract.TrackEntry.COLUMN_TRACK_NUMBER, tag.getFirst(FieldKey.TRACK));
+        values.put(DatabaseContract.TrackEntry.COLUMN_ARTIST_NAME, tag.getFirst(FieldKey.ARTIST));
+        values.put(DatabaseContract.TrackEntry.COLUMN_ALBUM_ARTIST_NAME,
+                tag.getFirst(FieldKey.ALBUM_ARTIST));
+        values.put(DatabaseContract.TrackEntry.COLUMN_ALBUM_NAME, tag.getFirst(FieldKey.ALBUM));
+        values.put(DatabaseContract.TrackEntry.COLUMN_YEAR, tag.getFirst(FieldKey.YEAR));
+        values.put(DatabaseContract.TrackEntry.COLUMN_FILE_PATH, file_path);
+        values.put(DatabaseContract.TrackEntry.COLUMN_IS_INVALID_TRACK, is_invalid);
+
+        long new_row_id = database.insert(DatabaseContract.TrackEntry.TABLE_NAME,
+                null, values);
+
+
+    }
+
+    public void delete_temp_file() {
+        if (is_invalid) {
+
+            SQLiteDatabase database = database_helper.getWritableDatabase();
+
+            String Selection = DatabaseContract.TrackEntry.COLUMN_TRACK_NAME + " LIKE ?";
+            String arguments[] = {"Default Audio Track"};
+
+            int deleted_rows = database.delete(DatabaseContract.TrackEntry.TABLE_NAME,
+                    Selection, arguments);
+
+            System.out.println("Number of Deleted Rows: " + deleted_rows);
+
+            // Now delete the file as well.
+            file.delete();
+
+        }
+    }
     // Private Section
-    private String file_path;
-    private AudioFile audio_file;
+    private DatabaseContract.TrackEntryDBHelper database_helper = null;
+    private final String file_path;
+    private final AudioFile audio_file;
     private File file;
-    private Context my_context;
+    private final boolean is_invalid;
+    private Context passed_context;
 }
