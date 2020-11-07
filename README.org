@@ -1,10 +1,15 @@
-#+TITLE: CSC 4320 Project
+#+TITLE: CSC 4320 Project: Android Music Player
 #+AUTHOR: Ulysses Carlos
 #+DATE: <2020-08-31 Mon>
 #+OPTIONS: toc:nil
 * CSC 4320 Project
 ** Description
-[Insert Project Description]
+This contains the files needed for the final Project in CSC 4320 (Operating Systems).
+** Dependencies
+- [[http://www.jthink.net/jaudiotagger/][JThink was used for reading audio tags]]
+-
+** Components
+
 ** Build Information
-You can compile this project by doing the following:
+As this application was made in Android Studio, You should be able to build and run this application if you import the project.
 

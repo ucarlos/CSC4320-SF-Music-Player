@@ -20,10 +20,10 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 
-public class DatabaseTag {
+public class DatabaseTrack {
     // Public Section
 
-    public DatabaseTag(Context context) throws IOException, TagException, ReadOnlyFileException,
+    public DatabaseTrack(Context context) throws IOException, TagException, ReadOnlyFileException,
             CannotReadException, InvalidAudioFrameException {
         // Access Information in assets/
         passed_context = context;
@@ -63,7 +63,7 @@ public class DatabaseTag {
 
     }
 
-    public DatabaseTag(Context context, String file_path) throws TagException,
+    public DatabaseTrack(Context context, String file_path) throws TagException,
             ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
         this.passed_context = context;
         database_helper = new DatabaseContract.TrackEntryDBHelper(passed_context);
@@ -72,12 +72,14 @@ public class DatabaseTag {
         // Assume that the file is not a test or temp file. That's why the first constructor
         // exists.
         is_invalid = false;
-        audio_file = AudioFileIO.read(new File(file_path));
+        file = new File(file_path);
+        audio_file = AudioFileIO.read(file);
     }
 
     public final AudioFile get_audio_file() { return audio_file; }
     public final String get_file_path() { return file_path; }
     public final boolean is_temp_file() { return is_invalid; }
+    public final File get_file() { return file; }
 
     public void print_tags() {
         Tag tag = audio_file.getTag();
@@ -102,9 +104,7 @@ public class DatabaseTag {
      *
      * -----------------------------------------------------------------------------
      */
-    public void insert_into_database() {
-
-
+    public void database_insert() {
         SQLiteDatabase database = database_helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         Tag tag = audio_file.getTag();
@@ -121,6 +121,11 @@ public class DatabaseTag {
         long new_row_id = database.insert(DatabaseContract.TrackEntry.TABLE_NAME,
                 null, values);
 
+
+    }
+
+    public void database_remove() {
+        SQLiteDatabase database = database_helper.getWritableDatabase();
 
     }
 
@@ -142,11 +147,13 @@ public class DatabaseTag {
 
         }
     }
+
+
     // Private Section
     private DatabaseContract.TrackEntryDBHelper database_helper = null;
     private final String file_path;
     private final AudioFile audio_file;
-    private File file;
+    private final File file;
     private final boolean is_invalid;
     private Context passed_context;
 }

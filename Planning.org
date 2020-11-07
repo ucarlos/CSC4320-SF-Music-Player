@@ -1,11 +1,10 @@
 #+title: CSC 4320 Project 2 Planning
 #+author: Ulysses Carlos
-
+#+date: <2020-10-28 Wed>
 * TODO Milestones
-** Setup Database
-
-*** What Database are you going to use?
-At this point, I see that I should go ahead and use SQLite
+** DONE Setup Database
+*** DONE What Database are you going to use?
+At this point, I see that I should go ahead and use SQLite.
 *** DONE I need some form of tag reader
 **** [#B] Taglib (C++) [REJECTED]
 + Fast
@@ -13,12 +12,12 @@ At this point, I see that I should go ahead and use SQLite
 + Supports MP3, Vorbis, Flac, MPC, Speex, WavPack, TrueAudio, WAV, AIFF, MP4 and ASF
 - Requires a bridge between java and c++
 - Has be to connected to Android somehow
-**** DONE [#A] ealvatag (Java)
+**** DONE [#A] ealvatag (Java) 
 + Written in Java
 + Supports MP3, Flac, Vorbis, Mp4, Aiff, Wav, Wma, and DSF
 - Requires Dependencies to run
 - Slower  
-*** How should audio data be stored in a database?
+*** DONE How should audio data be stored in a database?
 - ID - incrementing uint32_t, each track has a unique id.
 - Track Title -- Variable String
 - Track Number -- int32_t
@@ -27,13 +26,22 @@ At this point, I see that I should go ahead and use SQLite
 - Album Name -- Variable String
 - Year -- either uint16_t or uint32_t
 - location in file_path -- Variable String
-
-  
-*** Default Audio 
-*** TODO Setup a database connector
-** Test Audio playback
-*** Read about MediaPlayer and how it works
-** Test File System Navigation
+*** Default Audio Setup
+** TODO Setup a database connector - <2020-11-05 Thu>
+- <2020-11-04 Wed>: DatabaseTrack connects to DatabaseContract class to insert
+  a track into the database. Insertion works, but I need to prevent duplicates from being entered into the database. I also don't know if I should create another class to handle that.
+** TODO Test Audio playback
+*** TODO Read about MediaPlayer and how it works
+*** Test Audio Playback in another application/project
+*** Try to integrate it as the main activity/fragment
+** TODO Test File System Navigation
+*** Learn how to navigate the android file system to add a file
+*** Only display directories and acceptable audio files
+*** Click on a file should create a DatabaseTrack object
+** Polish it up!
+*** Improve UI
+*** Fix any bugs in the application
+*** Improve application performance
 
 * Activities needed
 - Main Activity
@@ -43,4 +51,9 @@ At this point, I see that I should go ahead and use SQLite
 - I need a list of icons to use?
 - Maybe get an icon pack somewhere?  
 * Database Details
+Example
 * Multithreading
+Each aspect of the application should have a single thread.
+- Database Read/Write
+- Audio Playback
+- File Management
