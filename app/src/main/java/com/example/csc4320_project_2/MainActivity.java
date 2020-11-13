@@ -2,9 +2,6 @@ package com.example.csc4320_project_2;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.media.AudioAttributes;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
@@ -32,27 +29,13 @@ import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.TagException;
 
 import java.io.IOException;
-import java.net.URI;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
 
 
-    protected void test_audio(DatabaseTrack databaseTrack) throws IOException {
-        Uri audio_uri = Uri.fromFile(databaseTrack.get_file());
-        MediaPlayer media_player = new MediaPlayer();
-        media_player.setAudioAttributes(
-                new AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-        );
-        media_player.setDataSource(getApplicationContext(), audio_uri);
-        media_player.prepare();
-        media_player.start();
-
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     protected void testDatabaseTag() throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
@@ -98,8 +81,6 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("TESTING AUDIO PLAYBACK!");
         System.out.println("****************************************************************");
 
-        //test_audio(dt);
-
         dt.delete_temp_file();
 
         System.out.println("****************************************************************");
@@ -138,21 +119,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        /*
-        try {
-            testDatabaseTag();
-        } catch (ReadOnlyFileException e) {
-            e.printStackTrace();
-        } catch (CannotReadException e) {
-            e.printStackTrace();
-        } catch (TagException e) {
-            e.printStackTrace();
-        } catch (InvalidAudioFrameException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-         */
     }
 
     @Override

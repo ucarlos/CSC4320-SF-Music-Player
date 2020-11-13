@@ -26,6 +26,7 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.TagException;
 
 import java.io.IOException;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
@@ -42,22 +43,42 @@ public class HomeFragment extends Fragment {
                 new ViewModelProvider(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         final TextView textView = root.findViewById(R.id.text_audio_track);
+
+        // TextViews
         TextView track_name = root.findViewById(R.id.text_audio_track);
+        track_name.setText(R.string.default_audio_track);
         TextView audio_length_text = root.findViewById(R.id.text_audio_duration);
         audio_length_text.setVisibility(View.VISIBLE);
+        TextView artist_text = root.findViewById(R.id.text_audio_artist);
+
+        //audio_length_text.setGravity(View.TEXT_ALIGNMENT_CENTER);
 
         // Thread to monitor audio playback:
         // It basically waits loops until Audio playback starts, and
         new Thread(new Runnable() {
+
+            public String create_audio_duration(long current_audio_in_sec,
+                                                long max_audio_in_sec) {
+
+                return String.format("%02d:%02d / %02d:%02d",
+                        current_audio_in_sec / 60,
+                        current_audio_in_sec % 60,
+                        max_audio_in_sec / 60,
+                        max_audio_in_sec % 60);
+
+            }
+
+
             @Override
             public void run() {
-                long max_audio_duration = -1;
-                long current_audio_position = -1;
+                long max_audio_duration_milisec = -1;
+                // Current audio position in miliseconds and seconds respectively.
+                long current_audio_position_milisec = -1;
                 while (true) {
                     while (audio_button_status == PlaybackStatus.INITIAL)
                         continue; // Do nothing
 
-                    max_audio_duration = media_player.getDuration();
+                    max_audio_duration_milisec = media_player.getDuration();
                     //audio_length_text.setVisibility(View.VISIBLE);
                     String audio_position;
                     // Print the audio elapsed time
@@ -67,18 +88,23 @@ public class HomeFragment extends Fragment {
                         else if (audio_button_status == PlaybackStatus.STOPPED)
                             break;
                         else {
-                            current_audio_position = media_player.getCurrentPosition();
-                            audio_position = (current_audio_position / 1000) + " / " + (max_audio_duration / 1000);
-                            audio_length_text.setText(audio_position);
+                            current_audio_position_milisec = media_player.getCurrentPosition();
+                            // Wait a second
+                            String text = create_audio_duration(current_audio_position_milisec / 1000,
+                                    max_audio_duration_milisec / 1000);
+                            audio_length_text.setText(text);
                         }
-                    } while (current_audio_position < max_audio_duration);
+                    } while (current_audio_position_milisec < max_audio_duration_milisec);
 
-                    // Now release the media_player and set everyting back to normal.
+
+                    // Now release the media_player and set everything back to normal.
                     // Set audio to stopped if it hasn't already
                     audio_button_status = PlaybackStatus.STOPPED;
+                    media_player.reset();
                     media_player.release();
                     media_player = null;
                     audio_button_status = PlaybackStatus.INITIAL;
+
                     //audio_length_text.setVisibility(View.INVISIBLE);
                 }
             }
@@ -129,8 +155,8 @@ public class HomeFragment extends Fragment {
                     // Now play audio:
                     audio_button_status = PlaybackStatus.IS_PLAYING;
                     String title = track.get_audio_file().getTag().getFirst(FieldKey.TITLE);
-                    audio_button.setText(getString(R.string.audio_play));
-
+                    audio_button.setText(getString(R.string.audio_pause));
+                    artist_text.setText(track.get_audio_file().getTag().getFirst(FieldKey.ARTIST));
                     track_name.setText(title);
                     System.out.println("NOW PLAYING");
                     media_player.start();
@@ -165,6 +191,7 @@ public class HomeFragment extends Fragment {
                 if (audio_button_status != PlaybackStatus.INITIAL){
                     media_player.stop();
                     audio_button_status = PlaybackStatus.STOPPED;
+                    audio_button.setText(R.string.audio_play);
                     return true;
                 }
                 return false;

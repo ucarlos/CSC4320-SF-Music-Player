@@ -15,6 +15,7 @@
     <string name="audio_pause">Pause</string>
     <string name="audio_next">Next</string>
     <string name="audio_prev">Prev</string>
-    <string name="default_audio_duration">[INVALID]</string>
-    <string name="default_audio_track">No Audio is Playing</string>
+    <string name="default_audio_duration">00:00/00:00</string>
+    <string name="default_audio_track">No Audio is Playing.</string>
+    <string name="default_album_art">This is the default album art.</string>
 </resources>
