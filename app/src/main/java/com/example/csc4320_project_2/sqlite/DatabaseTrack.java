@@ -155,5 +155,5 @@ public class DatabaseTrack {
     private final AudioFile audio_file;
     private final File file;
     private final boolean is_invalid;
-    private Context passed_context;
+    private final Context passed_context;
 }

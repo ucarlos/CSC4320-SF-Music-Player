@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("TESTING AUDIO PLAYBACK!");
         System.out.println("****************************************************************");
 
-        test_audio(dt);
+        //test_audio(dt);
 
         dt.delete_temp_file();
 
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-
+        /*
         try {
             testDatabaseTag();
         } catch (ReadOnlyFileException e) {
@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+         */
     }
 
     @Override

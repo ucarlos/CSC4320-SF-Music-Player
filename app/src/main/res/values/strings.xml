@@ -7,8 +7,14 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_home">Audio Player</string>
+    <string name="menu_gallery">Search Database</string>
+    <string name="menu_slideshow">Browse Filesystem</string>
     <string name="default_audio_file">default_audio_file.ogg</string>
+    <string name="audio_play">Play</string>
+    <string name="audio_pause">Pause</string>
+    <string name="audio_next">Next</string>
+    <string name="audio_prev">Prev</string>
+    <string name="default_audio_duration">[INVALID]</string>
+    <string name="default_audio_track">No Audio is Playing</string>
 </resources>
