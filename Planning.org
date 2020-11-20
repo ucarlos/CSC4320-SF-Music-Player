@@ -32,7 +32,7 @@ At this point, I see that I should go ahead and use SQLite.
   a track into the database. Insertion works, but I need to prevent duplicates from being entered into the database. I also don't know if I should create another class to handle that.
 ** TODO Test Audio playback
 *** TODO Read about MediaPlayer and how it works
-*** Test Audio Playback in another application/project
+*** DONE Test Audio Playback in another application/project
 *** Try to integrate it as the main activity/fragment
 ** TODO Test File System Navigation
 *** Learn how to navigate the android file system to add a file

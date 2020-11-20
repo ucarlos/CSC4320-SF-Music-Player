@@ -18,4 +18,6 @@
     <string name="default_audio_duration">00:00/00:00</string>
     <string name="default_audio_track">No Audio is Playing.</string>
     <string name="default_album_art">This is the default album art.</string>
+    <string name="default_filesystem_item_title">Dummy FS Item!</string>
+    <string name="default_filesystem_item_size">[UNKNOWN SIZE]</string>
 </resources>
