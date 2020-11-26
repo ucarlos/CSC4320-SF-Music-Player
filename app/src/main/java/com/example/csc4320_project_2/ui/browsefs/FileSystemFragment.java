@@ -37,20 +37,35 @@ public class FileSystemFragment extends Fragment {
     private final String root_path = "/";
     private Thread filesystem_adapter_thread;
 
-    private LinkedList<String> populate_root_directory(){
-        LinkedList<String> temp = new LinkedList<String>();
+    private LinkedList<File> populate_root_directory(){
+        LinkedList<File> temp = new LinkedList<File>();
 
         File directory = new File(root_path);
+        if (!directory.isDirectory()){
+            System.out.println("This is NOT a directory!");
+            return null;
+        }
+
         if (!directory.canRead()){
             System.out.println("Can't read that!");
         }
-        String[] list = directory.list();
-        if (list != null){
-            for (String file: list)
-                if (!file.contains("."))
-                    temp.add(file);
+
+        if (!directory.exists())
+            System.out.println("Also this file doesn't exist.");
+
+        File[] list = directory.listFiles();
+
+        if (list == null) return null;
+
+        if (list.length < 1)
+            return temp;
+        else {
+            for (File f: list)
+                if (f.canRead() && !f.getName().contains("."))
+                    temp.add(f);
 
         }
+
         Collections.sort(temp);
 
         return temp;
@@ -65,8 +80,7 @@ public class FileSystemFragment extends Fragment {
 
         // Set up RecyclerView:
 
-        LinkedList<String> list = populate_root_directory();
-
+        LinkedList<File> list = populate_root_directory();
         File new_file = new File(root_path);
         FileSystemAdapter filesystem_adapter = new FileSystemAdapter(list, new_file);
 

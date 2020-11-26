@@ -1,8 +1,11 @@
 package com.example.csc4320_project_2.ui.browsefs;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +21,7 @@ import java.util.List;
 
 public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.ViewHolder> {
 
-    private static List<String> localDataSet;
+    private static List<File> localDataSet;
     private static File parent_file = null;
     private static File current_file = null;
 
@@ -31,7 +34,9 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     private static final String CURRENT_DIRECTORY_STRING = ".";
     private static final String PARENT_DIRECTORY_STRING = "..";
     private TextView textView;
-
+    private Bitmap music_icon;
+    private Bitmap directory_icon;
+    private ImageView fs_item_icon;
 
     /**
      * Provide a reference to the type of views that you are using
@@ -76,46 +81,19 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
                     // guarrenees that there is at least one item that represents the current directory.
                     // Clicking on it will do nothing.
                     System.out.println("You clicked on the element with string " +
-                            localDataSet.get(element_value));
-                    if (parent_file == null){
-                        // Move down the root directory if it is not empty.
-                        if (!localDataSet.get(element_value).equalsIgnoreCase(CURRENT_DIRECTORY_STRING)){
+                            localDataSet.get(element_value).getAbsolutePath());
 
-                            File new_file = new File(container.dataset.get(element_value));
-                            try {
-                                move_directory(new_file, container);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
+                    try {
+                        onClickCheckItem(element_value);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    else if (localDataSet.get(element_value).equalsIgnoreCase(PARENT_DIRECTORY_STRING)){
-                        // If the user is moving up the file system
-                        //move_directory(parent_file);
-                        try {
-                            move_directory(container.container_parent_file, container);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    else {
-                        // If the user is moving down the filesystem and the file has a non-null parent file.
-                        //move_directory(new File(localDataSet.get(element_value)));
-                        File new_file = new File(container.dataset.get(element_value));
-                        try {
-                            move_directory(new_file, container);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    // Search the data set for that particular index:
-
-                    //System.out.println("Mission failed. We'll get them next time.");
                 }
             });
             textView =  view.findViewById(R.id.fs_item_name);
+            music_icon = BitmapFactory.decodeResource(view.getContext().getResources(), R.drawable.music_note_24px);
+            directory_icon = BitmapFactory.decodeResource(view.getContext().getResources(), R.drawable.folder_24px);
+
         }
 
 
@@ -133,24 +111,33 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
          * by RecyclerView.
          *
          */
-        private void onClickCheckItem(int adapter_position){
-            String item_name = container.dataset.get(adapter_position);
+        private void onClickCheckItem(int adapter_position) throws InterruptedException {
+            File file = container.dataset.get(adapter_position);
+
+            // This also handles . as well as other files that are being displayed.
+            if (!file.exists()) // Do nothing if the file doesn't exist.
+                return;
+
+
+            String item_name = container.dataset.get(adapter_position).getName();
             // Do nothing if item is "."
             if (item_name.equalsIgnoreCase(CURRENT_DIRECTORY_STRING))
                 return;
 
-            // Now handle if the directory is at the top (parent_file is null)
-            if (container.container_parent_file == null){
+            get_directory_list(file);
 
-                // Assume that you don't need to handle a empty directoty.
+            /*
+            // Now handle if the directory is at the top (parent_file is null)
+            if (file.isDirectory()) {
+                //move_directory(file, container);
+            }
+            else { // Do file shit
 
             }
-
+            */
             // If the file is .., then you are moving to the parent directory, and
             // You should make sure to add its parent directory if it has one.
             // Y
-
-
         }
     }
 
@@ -162,7 +149,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
      *
      * @param passed_file File representing the current directory.
      */
-    public FileSystemAdapter(List<String> dataSet, File passed_file) throws NullPointerException{
+    public FileSystemAdapter(List<File> dataSet, File passed_file) throws NullPointerException{
         passed_file.isFile();
 
         localDataSet = dataSet;
@@ -171,7 +158,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
             // Add a single item stating that the filesystem is empty, represented by
             // the character '.' which is the same as in linux.
             // There will always be a single item in the dataset, representing the current directory.
-            localDataSet.add(CURRENT_DIRECTORY_STRING);
+            localDataSet.add(new File(CURRENT_DIRECTORY_STRING));
         }
 
         // Add a item
@@ -183,7 +170,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         // Add a string that represents the parent file (if it exists) to the dataset.
         // It will be represented as .., the same as in Linux.
         if (parent_file != null)
-            localDataSet.add(PARENT_DIRECTORY_INDEX, PARENT_DIRECTORY_STRING);
+            localDataSet.add(parent_file);
     }
 
     // Create new views (invoked by the layout manager)
@@ -206,7 +193,13 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        viewHolder.getTextView().setText(localDataSet.get(position));
+        File f = localDataSet.get(position);
+
+        // If the file is the parent of current file, then replace text with ..
+        if (f.equals(current_file.getParentFile()))
+            viewHolder.getTextView().setText("..");
+        else // Otherwise set it to the name of the file.
+            viewHolder.getTextView().setText(localDataSet.get(position).getName());
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -215,6 +208,25 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         return localDataSet.size();
     }
 
+
+    private void get_directory_list(File new_file) {
+        if (!new_file.exists())
+            return;
+
+        LinkedList<File> temp_list = populate_directory(new_file);
+
+        if (!temp_list.isEmpty()) {
+            System.out.println("Printing list of files in " + new_file.getAbsolutePath());
+            for (File fi : temp_list) {
+                System.out.printf("File Name: %s\tFilePath: %s\n", fi.getName(), fi.getAbsolutePath());
+            }
+        }
+        else {
+            System.out.println("File Path " + new_file.getAbsolutePath() +
+                    " is either empty or inaccessible.");
+        }
+
+    }
     /**
      * Repopulate the dataset to include all files in the directory located in new_file.
      *
@@ -227,38 +239,39 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         if (!new_file.exists())
             return;
 
-        // If the new_file is the parent_file of current_file, simply assign  parent_file to current_file,
+        // If the new_file is the parent_file of current_file, simply assign parent_file to current_file,
         // and then set the parent of parent_file as the new parent_file.
         if (new_file.equals(container.container_parent_file)){
             container.container_current_file = new_file;
             container.container_parent_file = new_file.getParentFile();
         }
+        else {
+            // Assume the new_file is a child file of current_file, so set current_file as parrent_file.
+            container.container_parent_file = container.container_current_file;
+            container.container_current_file = new_file;
 
+        }
 
-        // Assume the new_file is a child file of current_file, so set current_file as parrent_file.
-        container.container_parent_file = container.container_current_file;
-        container.container_current_file = new_file;
-        LinkedList<String> temp_list = populate_directory(new_file);
-
+        LinkedList<File> temp_list = populate_directory(new_file);
 
         // If the new file has a parent file that is valid, or if the file cannot be read,
         // Make sure to add the parent directory string.
 
         if (temp_list.isEmpty() || (new_file.getParentFile() != null)){
-            temp_list.add(PARENT_DIRECTORY_STRING);
+            temp_list.add(new_file.getParentFile());
         }
 
         // Clear the localdataset and then populate it again with temp_list.
-
-        localDataSet.clear();
-        localDataSet.addAll(temp_list);
+        for (File f : temp_list){
+            System.out.println("File Path: " + f.getAbsolutePath());
+        }
 
         //localDataSet = temp_list;
         regenerate_dataset(container.dataset, temp_list);
 
     }
 
-    private synchronized void regenerate_dataset(List<String> dataset, List<String> new_list) throws InterruptedException {
+    private synchronized void regenerate_dataset(List<File> dataset, List<File> new_list) throws InterruptedException {
 
         set_directory_status(Directory_Status.REMOVING_OLD_DATASET);
         // Wake up the Container:
@@ -282,18 +295,20 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     }
 
 
-    private static LinkedList<String> populate_directory(File file){
-        LinkedList<String> temp = new LinkedList<String>();
+    private static LinkedList<File> populate_directory(File file){
+        LinkedList<File> temp = new LinkedList<File>();
 
         File directory = file;
         if (!directory.canRead()){
             return temp;
         }
-        String[] list = directory.list();
+
+        File [] list = directory.listFiles();
+
         if (list != null){
-            for (String str: list)
-                if (!str.contains("."))
-                    temp.add(str);
+            for (File f: list)
+                if (!f.getName().contains("."))
+                    temp.add(f);
 
         }
         Collections.sort(temp);
@@ -307,7 +322,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     // localdataset, current_file, and parent_file. This is done to avoid having to make
     // ViewHolder a static class.
     private static class ViewHolderArgumentContainer {
-        private List<String> dataset = localDataSet;
+        private List<File> dataset = localDataSet;
         private File container_current_file = current_file;
         private File container_parent_file = parent_file;
         // Default constructor
@@ -316,7 +331,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
         }
 
-        public ViewHolderArgumentContainer(List<String> dataset, File c_current_file,
+        public ViewHolderArgumentContainer(List<File> dataset, File c_current_file,
                                            File c_parent_file){
             this.dataset = dataset;
             this.container_current_file = current_file;
