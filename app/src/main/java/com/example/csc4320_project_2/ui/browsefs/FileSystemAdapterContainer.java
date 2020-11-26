@@ -27,15 +27,38 @@ public class FileSystemAdapterContainer {
             // Remove all items from list corresponding to old directory
             // Add all items from list corresponding to new directory
             // Set variable back to false and sleep.
+            try {
+                repopulate_items();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
         }
 
         public synchronized void repopulate_items() throws InterruptedException {
             // Do nothing util needed.
-            while (!fileSystemAdapter.regenerate_directory())
+            while (!fileSystemAdapter.directory_is_initial())
                 wait();
 
             // Now notify that the items have been removed.
+            fileSystemAdapter.notifyItemRangeRemoved(0, fileSystemAdapter.getItemCount());
+            fileSystemAdapter.set_directory_status(FileSystemAdapter.Directory_Status.REGENERATING_NEW_DATASET);
+
+            // Wake up the Adapter
+            notifyAll();
+
+            while (fileSystemAdapter.get_directory_status() == FileSystemAdapter.Directory_Status.REGENERATING_NEW_DATASET)
+                wait();
+
+            // Now notify that new items have been added to the adapter.
+            fileSystemAdapter.notifyItemRangeInserted(0, fileSystemAdapter.getItemCount());
+            fileSystemAdapter.set_directory_status(FileSystemAdapter.Directory_Status.INITIAL);
+
+            // Now wake up the Adapter again.
+            notifyAll();
+            // Done!
+
+
         }
 
     }
