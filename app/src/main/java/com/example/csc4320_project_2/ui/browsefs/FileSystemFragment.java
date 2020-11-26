@@ -1,6 +1,8 @@
 package com.example.csc4320_project_2.ui.browsefs;
 
+import android.media.audiofx.EnvironmentalReverb;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.csc4320_project_2.R;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.Collections;
+import java.util.LinkedList;
 
 
 public class FileSystemFragment extends Fragment {
@@ -30,8 +34,28 @@ public class FileSystemFragment extends Fragment {
 
     private SlideshowViewModel slideshowViewModel;
     private RecyclerView recyclerView;
-    private final String filesystem_root = "/";
+    private final String root_path = "/";
+    private Thread filesystem_adapter_thread;
 
+    private LinkedList<String> populate_root_directory(){
+        LinkedList<String> temp = new LinkedList<String>();
+
+        File directory = new File(root_path);
+        if (!directory.canRead()){
+            System.out.println("Can't read that!");
+        }
+        String[] list = directory.list();
+        if (list != null){
+            for (String file: list)
+                if (!file.contains("."))
+                    temp.add(file);
+
+        }
+        Collections.sort(temp);
+
+        return temp;
+
+    }
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         slideshowViewModel =
@@ -41,15 +65,17 @@ public class FileSystemFragment extends Fragment {
 
         // Set up RecyclerView:
 
-        ArrayList<String> list = new ArrayList<String>();
-        list.add("Hello World!");
+        LinkedList<String> list = populate_root_directory();
+
+        File new_file = new File(root_path);
+        FileSystemAdapter filesystem_adapter = new FileSystemAdapter(list, new_file);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
 
-        // WHY IS THIS NULL
+
         recyclerView = root.findViewById(R.id.FileSystemView);
         recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(new FileSystemAdapter(list));
+        recyclerView.setAdapter(filesystem_adapter);
 
 
 
@@ -61,4 +87,6 @@ public class FileSystemFragment extends Fragment {
         });
         return root;
     }
+
+
 }
