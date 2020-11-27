@@ -25,18 +25,24 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     private static File parent_file = null;
     private static File current_file = null;
 
-    // Represents the parent directory reference .. in a directory.
-    private static final int PARENT_DIRECTORY_INDEX = 2147483647;
-
-    // Represenets the current directory reference . in a directory.
-    private static final int CURRENT_DIRECTORY_INDEX = 2147483646;
-
     private static final String CURRENT_DIRECTORY_STRING = ".";
     private static final String PARENT_DIRECTORY_STRING = "..";
     private TextView textView;
+
+    public static boolean UserHasClicked() {
+        return hasClicked;
+    }
+
+    public static void setHasClicked(boolean hasClicked) {
+        FileSystemAdapter.hasClicked = hasClicked;
+    }
+
+    private static boolean hasClicked = false;
+    /*
     private Bitmap music_icon;
     private Bitmap directory_icon;
     private ImageView fs_item_icon;
+     */
 
     /**
      * Provide a reference to the type of views that you are using
@@ -73,7 +79,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
                         on the asusmption that no user will have that amount of files in a given directory.
 
                      */
-
+                    setHasClicked(true);
                     // If you're at the root directoy, there is no parent file that be shown.
                     // Instead, clicking on each item will move you to that directory.
 
@@ -91,8 +97,11 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
                 }
             });
             textView =  view.findViewById(R.id.fs_item_name);
+            /*
             music_icon = BitmapFactory.decodeResource(view.getContext().getResources(), R.drawable.music_note_24px);
             directory_icon = BitmapFactory.decodeResource(view.getContext().getResources(), R.drawable.folder_24px);
+
+             */
 
         }
 
@@ -124,17 +133,16 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
             if (item_name.equalsIgnoreCase(CURRENT_DIRECTORY_STRING))
                 return;
 
-            get_directory_list(file);
+            //get_directory_list(file);
 
-            /*
+
             // Now handle if the directory is at the top (parent_file is null)
             if (file.isDirectory()) {
-                //move_directory(file, container);
+                move_directory(file, container);
             }
             else { // Do file shit
-
+                ;
             }
-            */
             // If the file is .., then you are moving to the parent directory, and
             // You should make sure to add its parent directory if it has one.
             // Y
@@ -161,7 +169,8 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
             localDataSet.add(new File(CURRENT_DIRECTORY_STRING));
         }
 
-        // Add a item
+        // Set boolean to hasClicked:
+        setHasClicked(false);
 
 
         current_file = passed_file;
@@ -197,7 +206,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
         // If the file is the parent of current file, then replace text with ..
         if (f.equals(current_file.getParentFile()))
-            viewHolder.getTextView().setText("..");
+            viewHolder.getTextView().setText(PARENT_DIRECTORY_STRING);
         else // Otherwise set it to the name of the file.
             viewHolder.getTextView().setText(localDataSet.get(position).getName());
     }
@@ -268,30 +277,37 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
         //localDataSet = temp_list;
         regenerate_dataset(container.dataset, temp_list);
+        // Now set false.
+        setHasClicked(false);
 
     }
 
     private synchronized void regenerate_dataset(List<File> dataset, List<File> new_list) throws InterruptedException {
 
         set_directory_status(Directory_Status.REMOVING_OLD_DATASET);
+        System.out.println("Adapter: Setting Directory Status to \"REMOVING OLD DATASET.");
+        System.out.println(get_directory_status().toString());
         // Wake up the Container:
         notifyAll();
 
         // Do nothing until the adapter is notified that the dataset has been cleared.
+        System.out.println("Adapter: Sleeping until Thread has removed the old dataset from the adapter.");
         while (get_directory_status() == Directory_Status.REMOVING_OLD_DATASET)
             wait();
 
+        System.out.println("Adapter: Waking up and clearing the old database to make room for the new database.");
         // Now clear the database.
         dataset.clear();
         dataset.addAll(new_list);
         set_directory_status(Directory_Status.ADDING_NEW_DATASET);
         notifyAll();
 
+        System.out.println("Adapter: Sleeping until the Thread finishes adding the new dataset into the database.");
         while (get_directory_status() == Directory_Status.ADDING_NEW_DATASET)
             wait();
 
         // Now complete!
-
+        System.out.println("Adapter: Complete!");
     }
 
 
@@ -327,9 +343,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         private File container_parent_file = parent_file;
         // Default constructor
 
-        public ViewHolderArgumentContainer(){
-
-        }
+        public ViewHolderArgumentContainer(){ }
 
         public ViewHolderArgumentContainer(List<File> dataset, File c_current_file,
                                            File c_parent_file){

@@ -83,13 +83,20 @@ public class FileSystemFragment extends Fragment {
         LinkedList<File> list = populate_root_directory();
         File new_file = new File(root_path);
         FileSystemAdapter filesystem_adapter = new FileSystemAdapter(list, new_file);
-
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
 
+        // Set up container thread:
+        FileSystemAdapterContainer adapterContainer = new FileSystemAdapterContainer(filesystem_adapter);
 
         recyclerView = root.findViewById(R.id.FileSystemView);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(filesystem_adapter);
+
+
+        // Now call the container into a new thread.
+        //filesystem_adapter_thread = new Thread(adapterContainer.getRunnable());
+        //filesystem_adapter_thread.start();
+        getActivity().runOnUiThread(adapterContainer.getRunnable());
 
 
 
