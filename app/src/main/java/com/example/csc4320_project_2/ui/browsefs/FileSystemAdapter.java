@@ -29,6 +29,9 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     private static final String PARENT_DIRECTORY_STRING = "..";
     private TextView textView;
 
+    private final String file_extention_list[] = {".mp3", ".m4a", ".aac",
+            ".flac", ".ogg", ".opus"};
+
     public static boolean UserHasClicked() {
         return hasClicked;
     }
@@ -124,7 +127,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
             File file = container.dataset.get(adapter_position);
 
             // This also handles . as well as other files that are being displayed.
-            if (!file.exists()) // Do nothing if the file doesn't exist.
+            if (!file.exists() || file.isHidden()) // Do nothing if the file doesn't exist or is hidden.
                 return;
 
 
@@ -140,8 +143,11 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
             if (file.isDirectory()) {
                 move_directory(file, container);
             }
-            else { // Do file shit
-                ;
+            else if (is_audio_file(item_name)){
+                // Add to database.
+            }
+            else { // Do nothing if the file is not an audio file.
+                return;
             }
             // If the file is .., then you are moving to the parent directory, and
             // You should make sure to add its parent directory if it has one.
@@ -149,6 +155,23 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         }
     }
 
+    /**
+     * Determine if the passed file_name is an accepted audio file.
+     * @param file_name Name of the file that has been clicked
+     * @return a boolean determining whether it is an audio_file or not.
+     */
+    public Boolean is_audio_file(String file_name){
+        int extension_index = file_name.lastIndexOf('.');
+        if (extension_index == -1) return false;
+
+
+        String file_name_extension = file_name.substring(extension_index);
+        for (String i : file_extention_list)
+            if (file_name_extension.equals(i))
+                return true;
+
+        return false;
+    }
     /**
      * Initialize the dataset of the Adapter.
      *

@@ -21,6 +21,7 @@ import com.example.csc4320_project_2.R;
 import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Objects;
 
 
 public class FileSystemFragment extends Fragment {
@@ -29,13 +30,13 @@ public class FileSystemFragment extends Fragment {
     // alongwith directories.
     // Basically, if you click a directory, it opens the contents of said directory.
     // There should be a option to go back (through .. on UNIX/Linux)
-    private final String file_extention_list[] = {".mp3", ".m4a", ".aac",
-            ".flac", ".ogg", ".opus"};
+
 
     private SlideshowViewModel slideshowViewModel;
     private RecyclerView recyclerView;
     private final String root_path = "/";
     private Thread filesystem_adapter_thread;
+    private static FileSystemAdapterContainer adapterContainer;
 
     private LinkedList<File> populate_root_directory(){
         LinkedList<File> temp = new LinkedList<File>();
@@ -86,7 +87,7 @@ public class FileSystemFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
 
         // Set up container thread:
-        FileSystemAdapterContainer adapterContainer = new FileSystemAdapterContainer(filesystem_adapter);
+        adapterContainer = new FileSystemAdapterContainer(filesystem_adapter);
 
         recyclerView = root.findViewById(R.id.FileSystemView);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -96,7 +97,24 @@ public class FileSystemFragment extends Fragment {
         // Now call the container into a new thread.
         //filesystem_adapter_thread = new Thread(adapterContainer.getRunnable());
         //filesystem_adapter_thread.start();
-        getActivity().runOnUiThread(adapterContainer.getRunnable());
+        filesystem_adapter_thread = new Thread(){
+            @Override
+            public void run(){
+                // Do nothing util the directory is initial.
+                while (true) {
+
+                    // Horrible spinlock solution
+                    while (adapterContainer.getFileSystemAdapter_const().directory_is_initial())
+                        ;
+
+                    System.out.println("Does this thread ever get here?");
+                    // Now run on the UI Thread.
+                    requireActivity().runOnUiThread(adapterContainer.getRunnable());
+                    //System.out.println("Now does it ever end too?");
+                }
+            }
+        };
+        filesystem_adapter_thread.start();
 
 
 

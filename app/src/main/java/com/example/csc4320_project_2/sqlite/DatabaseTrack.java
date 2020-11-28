@@ -76,6 +76,17 @@ public class DatabaseTrack {
         audio_file = AudioFileIO.read(file);
     }
 
+    public DatabaseTrack(Context context, File passed_file) throws TagException, ReadOnlyFileException, CannotReadException,
+            InvalidAudioFrameException, IOException {
+        this.passed_context = context;
+        database_helper = new DatabaseContract.TrackEntryDBHelper(passed_context);
+
+        this.file = passed_file;
+        is_invalid = false;
+        this.file_path = passed_file.getAbsolutePath();
+        audio_file = AudioFileIO.read(passed_file);
+    }
+
     public final AudioFile get_audio_file() { return audio_file; }
     public final String get_file_path() { return file_path; }
     public final boolean is_temp_file() { return is_invalid; }

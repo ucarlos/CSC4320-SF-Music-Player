@@ -13,13 +13,12 @@ package com.example.csc4320_project_2.ui.browsefs;
 
 
 public class FileSystemAdapterContainer {
-    public static FileSystemAdapter getFileSystemAdapter() {
+    public static final FileSystemAdapter getFileSystemAdapter() {
         return fileSystemAdapter;
     }
 
-    public static void setFileSystemAdapter(FileSystemAdapter fileSystemAdapter) {
-        FileSystemAdapterContainer.fileSystemAdapter = fileSystemAdapter;
-    }
+
+    public final FileSystemAdapter getFileSystemAdapter_const() { return fileSystemAdapter; }
 
     private static FileSystemAdapter fileSystemAdapter;
 
@@ -60,10 +59,7 @@ public class FileSystemAdapterContainer {
             // Remove all items from list corresponding to old directory
             // Add all items from list corresponding to new directory
             // Set variable back to false and sleep.
-
-            while (continue_running_thread()) {
-
-                System.out.println("Checking if User has Clicked.");
+                System.out.println("Will the user ever click?");
                 if (FileSystemAdapter.UserHasClicked()) {
                     try {
                         repopulate_items();
@@ -71,10 +67,8 @@ public class FileSystemAdapterContainer {
                         e.printStackTrace();
                     }
                 }
-                else {
-                }
+
             }
-        }
 
         public FileSystemAdapterRunnable(){
             super();
@@ -113,6 +107,5 @@ public class FileSystemAdapterContainer {
 
 
         }
-
     }
 }
