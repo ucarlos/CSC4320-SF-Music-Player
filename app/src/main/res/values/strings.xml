@@ -20,4 +20,6 @@
     <string name="default_album_art">This is the default album art.</string>
     <string name="default_filesystem_item_title">Dummy FS Item!</string>
     <string name="default_filesystem_item_size">[UNKNOWN SIZE]</string>
+    <string name="default_database_name">Dummy Track</string>
+    <string name="default_data_track_length">99:99</string>
 </resources>

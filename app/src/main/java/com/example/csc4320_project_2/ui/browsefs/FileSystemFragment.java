@@ -1,5 +1,6 @@
 package com.example.csc4320_project_2.ui.browsefs;
 
+import android.app.Activity;
 import android.media.audiofx.EnvironmentalReverb;
 import android.os.Bundle;
 import android.os.Environment;
@@ -37,7 +38,7 @@ public class FileSystemFragment extends Fragment {
     private final String root_path = "/";
     private Thread filesystem_adapter_thread;
     private static FileSystemAdapterContainer adapterContainer;
-
+    private static Activity parent_activity;
     private LinkedList<File> populate_root_directory(){
         LinkedList<File> temp = new LinkedList<File>();
 
@@ -78,7 +79,7 @@ public class FileSystemFragment extends Fragment {
                 new ViewModelProvider(this).get(SlideshowViewModel.class);
         View root = inflater.inflate(R.layout.fragment_filesystem, container, false);
         final TextView textView = root.findViewById(R.id.text_slideshow);
-
+        parent_activity = getActivity();
         // Set up RecyclerView:
 
         LinkedList<File> list = populate_root_directory();
@@ -98,19 +99,36 @@ public class FileSystemFragment extends Fragment {
         //filesystem_adapter_thread = new Thread(adapterContainer.getRunnable());
         //filesystem_adapter_thread.start();
         filesystem_adapter_thread = new Thread(){
+            private boolean thread_run_status = false;
+            public void enable_thread() { thread_run_status = true; }
+            public void disable_thread() { thread_run_status = false; }
+            public final boolean thread_is_running() { return thread_run_status; }
+
             @Override
             public void run(){
                 // Do nothing util the directory is initial.
+
+
                 while (true) {
 
                     // Horrible spinlock solution
+                    System.out.println("FS Adapter Thread: Checking if Directory is initial.");
                     while (adapterContainer.getFileSystemAdapter_const().directory_is_initial())
                         ;
 
-                    System.out.println("Does this thread ever get here?");
+                    System.out.println("FS Adapter Thread: Attempt to run the UI Thread.");
                     // Now run on the UI Thread.
-                    requireActivity().runOnUiThread(adapterContainer.getRunnable());
-                    //System.out.println("Now does it ever end too?");
+
+                    //requireActivity().runOnUiThread(adapterContainer.getRunnable());
+                    //requireActivity().runOnUiThread(new FileSystemAdapterContainer.FileSystemAdapterRunnable(filesystem_adapter));
+
+                    adapterContainer.getRunnable().run();
+
+                    System.out.println("FS Adapter Thread: Blocking util the Directory is ready again.");
+                    // Now block until the directory is ready again.
+                    while (!adapterContainer.getFileSystemAdapter_const().directory_is_initial())
+                        ;
+                    System.out.println("Fs Adapter Thread: Continuing into another loop.");
                 }
             }
         };

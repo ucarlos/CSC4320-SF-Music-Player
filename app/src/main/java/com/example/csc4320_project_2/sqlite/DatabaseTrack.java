@@ -135,6 +135,7 @@ public class DatabaseTrack {
 
     }
 
+
     public void database_remove() {
         SQLiteDatabase database = database_helper.getWritableDatabase();
 

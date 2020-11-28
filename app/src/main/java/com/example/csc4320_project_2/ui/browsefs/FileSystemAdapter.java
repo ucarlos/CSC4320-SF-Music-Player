@@ -315,8 +315,10 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
         // Do nothing until the adapter is notified that the dataset has been cleared.
         System.out.println("Adapter: Sleeping until Thread has removed the old dataset from the adapter.");
-        while (get_directory_status() == Directory_Status.REMOVING_OLD_DATASET)
+        while (get_directory_status() == Directory_Status.REMOVING_OLD_DATASET) {
+            System.out.println("Adapter Directory Status: " + get_directory_status());
             wait();
+        }
 
         System.out.println("Adapter: Waking up and clearing the old database to make room for the new database.");
         // Now clear the database.
