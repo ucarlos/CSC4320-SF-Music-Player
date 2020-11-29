@@ -1,20 +1,23 @@
 package com.example.csc4320_project_2.ui.browsefs;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.csc4320_project_2.R;
+import com.example.csc4320_project_2.sqlite.DatabaseTrack;
 
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.TagException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +32,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     private static final String PARENT_DIRECTORY_STRING = "..";
     private TextView textView;
 
-    private final String file_extention_list[] = {".mp3", ".m4a", ".aac",
+    private final String[] file_extention_list = {".mp3", ".m4a", ".aac",
             ".flac", ".ogg", ".opus"};
 
     public static boolean UserHasClicked() {
@@ -52,7 +55,12 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
      * (custom ViewHolder).
      */
 
-    public enum Directory_Status { INITIAL, REMOVING_OLD_DATASET, REGENERATING_NEW_DATASET, ADDING_NEW_DATASET}
+    public enum Directory_Status {
+        INITIAL,
+        REMOVING_OLD_DATASET,
+        REGENERATING_NEW_DATASET,
+        ADDING_NEW_DATASET
+    }
 
     // Determines whether the adapter must have all of its items regenerated.
     // This only occurs when the user clicks an item that represents a directory.
@@ -82,7 +90,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
                         on the asusmption that no user will have that amount of files in a given directory.
 
                      */
-                    setHasClicked(true);
+                    //setHasClicked(true);
                     // If you're at the root directoy, there is no parent file that be shown.
                     // Instead, clicking on each item will move you to that directory.
 
@@ -93,8 +101,8 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
                             localDataSet.get(element_value).getAbsolutePath());
 
                     try {
-                        onClickCheckItem(element_value);
-                    } catch (InterruptedException e) {
+                        onClickCheckItem(element_value, v);
+                    } catch (InterruptedException | ReadOnlyFileException | CannotReadException | TagException | InvalidAudioFrameException | IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -121,9 +129,10 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
          *
          * @param  adapter_position int  Contains the position of the item in the dataset.
          * by RecyclerView.
+         * @param view
          *
          */
-        private void onClickCheckItem(int adapter_position) throws InterruptedException {
+        private void onClickCheckItem(int adapter_position, View view) throws InterruptedException, ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
             File file = container.dataset.get(adapter_position);
 
             // This also handles . as well as other files that are being displayed.
@@ -144,15 +153,22 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
                 move_directory(file, container);
             }
             else if (is_audio_file(item_name)){
-                // Add to database.
-            }
-            else { // Do nothing if the file is not an audio file.
-                return;
+                insert_file_into_database(view, file);
             }
             // If the file is .., then you are moving to the parent directory, and
             // You should make sure to add its parent directory if it has one.
             // Y
         }
+    }
+
+    /**
+     * Insert the given file into the database by constructing an DatabaseTrack object
+     * and inserting it into the database.
+     */
+    public void insert_file_into_database(View v, File passed_file) throws ReadOnlyFileException,
+            IOException, TagException, InvalidAudioFrameException, CannotReadException {
+        DatabaseTrack databaseTrack = new DatabaseTrack(v.getContext(), passed_file);
+        databaseTrack.database_insert();
     }
 
     /**
@@ -301,7 +317,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         //localDataSet = temp_list;
         regenerate_dataset(container.dataset, temp_list);
         // Now set false.
-        setHasClicked(false);
+        //setHasClicked(false);
 
     }
 
@@ -348,7 +364,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
         if (list != null){
             for (File f: list)
-                if (!f.getName().contains("."))
+                if (!f.getName().contains(CURRENT_DIRECTORY_STRING))
                     temp.add(f);
 
         }

@@ -12,10 +12,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.csc4320_project_2.R;
 import com.example.csc4320_project_2.sqlite.DatabaseContract;
+import com.example.csc4320_project_2.ui.browsefs.FileSystemAdapterContainer;
 
 import java.util.LinkedList;
 import java.util.Vector;
@@ -23,8 +25,9 @@ import java.util.Vector;
 public class DatabaseFragment extends Fragment {
 
     private DatabaseViewModel databaseViewModel;
-    private RecyclerView database_recycler_view;
+    private RecyclerView recycler_view;
     private LinkedList<DatabaseItem> DatabaseItem_List;
+    private DatabaseAdapter database_adapter;
 
     public LinkedList<DatabaseItem> populate_list(){
         // Populate from the database.
@@ -56,6 +59,11 @@ public class DatabaseFragment extends Fragment {
             DatabaseItem item = new DatabaseItem((String[]) temp_list.toArray());
             list.add(item);
         }
+
+        if (list.isEmpty()){ // Populate with dummy database items.
+            list.add(new DatabaseItem());
+            list.add(new DatabaseItem());
+        }
         return list;
     }
 
@@ -65,7 +73,19 @@ public class DatabaseFragment extends Fragment {
                 new ViewModelProvider(this).get(DatabaseViewModel.class);
         View root = inflater.inflate(R.layout.fragment_database, container, false);
         final TextView textView = root.findViewById(R.id.text_gallery);
+
+
         DatabaseItem_List = populate_list();
+
+        // Dummy value:
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+
+        // Set up container thread:
+        database_adapter = new DatabaseAdapter(DatabaseItem_List, this);
+        recycler_view = root.findViewById(R.id.DatabaseRecyclerView);
+        recycler_view.setLayoutManager(linearLayoutManager);
+        recycler_view.setAdapter(database_adapter);
         /*
         databaseViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
@@ -74,6 +94,7 @@ public class DatabaseFragment extends Fragment {
             }
         });
         */
+
 
         return root;
     }

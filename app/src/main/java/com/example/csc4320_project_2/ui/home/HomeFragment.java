@@ -1,5 +1,6 @@
 package com.example.csc4320_project_2.ui.home;
 
+import android.annotation.SuppressLint;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.csc4320_project_2.R;
 import com.example.csc4320_project_2.sqlite.DatabaseTrack;
+import com.example.csc4320_project_2.ui.database.FileParcel;
 
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
@@ -32,7 +34,7 @@ public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
     private MediaPlayer media_player = null;
-
+    private static FileParcel database_parcel;
     // Enum to handle playback
     public enum PlaybackStatus {INITIAL, IS_PLAYING, IS_PAUSED, STOPPED }
     PlaybackStatus audio_button_status = PlaybackStatus.INITIAL;
@@ -41,8 +43,26 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
+
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         final TextView textView = root.findViewById(R.id.text_audio_track);
+
+        // Retrieve Bundle from DatabaseFragment
+        Bundle bundle = this.getArguments();
+        /*
+        if (bundle != null){
+            database_parcel = bundle.getParcelable("audio_path");
+        }
+        else {
+            database_parcel = null;
+        }
+        */
+
+        // Set the parcel to null or not depending on whether database_fragment sent a audio path or not.
+        database_parcel = (bundle != null) ? bundle.getParcelable("audio_path") : null;
+
+
+
 
         // TextViews
         TextView track_name = root.findViewById(R.id.text_audio_track);
@@ -57,6 +77,7 @@ public class HomeFragment extends Fragment {
         // It basically waits loops until Audio playback starts, and
         new Thread(new Runnable() {
 
+            @SuppressLint("DefaultLocale")
             public String create_audio_duration(long current_audio_in_sec,
                                                 long max_audio_in_sec) {
 
@@ -117,7 +138,7 @@ public class HomeFragment extends Fragment {
         audio_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (audio_button_status == PlaybackStatus.INITIAL){
+                if (audio_button_status == PlaybackStatus.INITIAL) {
                     System.out.println("INITIAL STATE");
                     // Prepare a thread to play audio.
                     media_player = new MediaPlayer();
@@ -129,10 +150,20 @@ public class HomeFragment extends Fragment {
                     );
 
                     DatabaseTrack track = null;
-                    try {
-                        track = new DatabaseTrack(getContext());
-                    } catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
-                        e.printStackTrace();
+
+                    if (database_parcel != null) {
+                        try {
+                            track = new DatabaseTrack(getContext(), database_parcel.getFile_path());
+                        } catch (IOException | CannotReadException | ReadOnlyFileException | TagException | InvalidAudioFrameException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        try {
+                            track = new DatabaseTrack(getContext());
+                        } catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     assert track != null;

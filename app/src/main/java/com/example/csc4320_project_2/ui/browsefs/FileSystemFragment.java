@@ -1,9 +1,7 @@
 package com.example.csc4320_project_2.ui.browsefs;
 
 import android.app.Activity;
-import android.media.audiofx.EnvironmentalReverb;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +20,6 @@ import com.example.csc4320_project_2.R;
 import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Objects;
 
 
 public class FileSystemFragment extends Fragment {
@@ -33,7 +30,7 @@ public class FileSystemFragment extends Fragment {
     // There should be a option to go back (through .. on UNIX/Linux)
 
 
-    private SlideshowViewModel slideshowViewModel;
+    private FileSystemViewModel fileSystemViewModel;
     private RecyclerView recyclerView;
     private final String root_path = "/";
     private Thread filesystem_adapter_thread;
@@ -75,8 +72,8 @@ public class FileSystemFragment extends Fragment {
     }
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        slideshowViewModel =
-                new ViewModelProvider(this).get(SlideshowViewModel.class);
+        fileSystemViewModel =
+                new ViewModelProvider(this).get(FileSystemViewModel.class);
         View root = inflater.inflate(R.layout.fragment_filesystem, container, false);
         final TextView textView = root.findViewById(R.id.text_slideshow);
         parent_activity = getActivity();
@@ -136,7 +133,7 @@ public class FileSystemFragment extends Fragment {
 
 
 
-        slideshowViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        fileSystemViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

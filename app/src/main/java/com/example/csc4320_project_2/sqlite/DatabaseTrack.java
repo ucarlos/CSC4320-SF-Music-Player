@@ -87,6 +87,8 @@ public class DatabaseTrack {
         audio_file = AudioFileIO.read(passed_file);
     }
 
+
+
     public final AudioFile get_audio_file() { return audio_file; }
     public final String get_file_path() { return file_path; }
     public final boolean is_temp_file() { return is_invalid; }
