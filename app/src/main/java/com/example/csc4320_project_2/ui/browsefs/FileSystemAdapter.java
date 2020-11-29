@@ -44,6 +44,9 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     }
 
     private static boolean hasClicked = false;
+    private static String bop;
+    public final String get_bop() { return bop; }
+    public void set_bop(String str) { bop = str; }
     /*
     private Bitmap music_icon;
     private Bitmap directory_icon;
@@ -315,7 +318,11 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         }
 
         //localDataSet = temp_list;
+
+
         regenerate_dataset(container.dataset, temp_list);
+        //regenerate_dataset_spinlock(container.dataset, temp_list);
+
         // Now set false.
         //setHasClicked(false);
 
@@ -349,6 +356,33 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
         // Now complete!
         System.out.println("Adapter: Complete!");
+    }
+
+    /**
+     * A version of regenerate_dataset using nothing but spinlocks. Horribly inefficient; It is to
+     * be used if nothing else works.
+     * @param dataset
+     * @param new_list
+     */
+    public void regenerate_dataset_spinlock(List<File> dataset, List<File> new_list){
+        set_directory_status(Directory_Status.REMOVING_OLD_DATASET);
+        System.out.println("Adapter: Setting Directory Status to \"REMOVING OLD DATASET.");
+        System.out.println(get_directory_status().toString());
+        set_bop("SONICBOOM!");
+        while (get_directory_status() == Directory_Status.REMOVING_OLD_DATASET) {
+            continue;
+        }
+
+        System.out.println("Adapter: Waking up and clearing the old database to make room for the new database.");
+        dataset.clear();
+        dataset.addAll(new_list);
+        set_directory_status(Directory_Status.ADDING_NEW_DATASET);
+
+        System.out.println("Adapter: Sleeping until the Thread finishes adding the new dataset into the database.");
+        while (get_directory_status() == Directory_Status.ADDING_NEW_DATASET)
+            continue;
+
+        // Now complete.
     }
 
 

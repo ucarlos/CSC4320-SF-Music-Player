@@ -67,6 +67,8 @@ public class FileSystemAdapterContainer {
                     e.printStackTrace();
                 }
 
+                //repopulate_items_spinlock();
+
             }
 
         public FileSystemAdapterRunnable(){
@@ -85,7 +87,7 @@ public class FileSystemAdapterContainer {
             FileSystemAdapter adapter = getLocaladapter();
             System.out.println("Thread: Sleeping util Directory Status changes from INITIAL.");
             System.out.println(adapter.get_directory_status().toString());
-            while (!adapter.directory_is_initial()) {
+            while (adapter.directory_is_initial()) {
                 System.out.println("Thread Directory Status: " + adapter.get_directory_status());
                 wait();
             }
@@ -110,6 +112,33 @@ public class FileSystemAdapterContainer {
             // Now wake up the Adapter again.
             notifyAll();
             // Done!
+            System.out.println("Thread: Complete!");
+        }
+
+        /**
+         * Spinlock version of repopulate_items(). Horribly Ineffiecent.
+         */
+        public void repopulate_items_spinlock() {
+            FileSystemAdapter adapter = getLocaladapter();
+            System.out.println("Thread: Sleeping until Directory Status changes from INITIAL.");
+            String ss = adapter.get_bop();
+            adapter.set_bop("NOOOOOOOOOOOO!");
+            while (adapter.directory_is_initial()) {
+                continue;
+            }
+
+            System.out.println("Thread: Waking up since Directory Status is not INITIAL.");
+            System.out.println("Thread: Notifying that all items in the database have been removed.");
+            // Now notify that the items have been removed.
+            adapter.notifyItemRangeRemoved(0, adapter.getItemCount());
+            adapter.set_directory_status(FileSystemAdapter.Directory_Status.REGENERATING_NEW_DATASET);
+            while (adapter.get_directory_status() == FileSystemAdapter.Directory_Status.REGENERATING_NEW_DATASET)
+                continue;
+
+            System.out.println("Thread: Inserting new Database items into adapter and resetting Directory Status to INITIAL.");
+            adapter.notifyItemRangeInserted(0, adapter.getItemCount());
+            adapter.set_directory_status(FileSystemAdapter.Directory_Status.INITIAL);
+
             System.out.println("Thread: Complete!");
         }
     }

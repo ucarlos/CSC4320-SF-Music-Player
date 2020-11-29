@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.csc4320_project_2.R;
+import com.example.csc4320_project_2.ui.home.HomeFragment;
 
 import java.util.List;
 
@@ -82,7 +83,7 @@ public class DatabaseAdapter extends RecyclerView.Adapter<DatabaseAdapter.ViewHo
                     // Clicking on a database item sets an intent to the
                     // player fragment to play the song with the selected track.
 
-                    //onClickAddItem(element_value);
+                    onClickAddItem(element_value);
                 }
             });
 
@@ -105,7 +106,8 @@ public class DatabaseAdapter extends RecyclerView.Adapter<DatabaseAdapter.ViewHo
             // Prepare a fragment with a parcel containing the audio file path:
             String file_path = databaseItem.get_file_path();
             FileParcel fileParcel = new FileParcel(file_path);
-            Fragment fragment = new Fragment();
+            HomeFragment fragment = new HomeFragment();
+            //fragment.getFragmentManager().beginTransaction().replace(fragment, R.id.nav_home)
             // Replace fragment with home fragment.
 
 
@@ -113,6 +115,9 @@ public class DatabaseAdapter extends RecyclerView.Adapter<DatabaseAdapter.ViewHo
             bundle.putParcelable("audio_path", fileParcel);
             fragment.setArguments(bundle);
 
+            // Now replace the current_fragment with one of home fragment.
+            // I believe that this WONT WORK.
+            current_fragment.getFragmentManager().beginTransaction().replace(R.id.nav_gallery, fragment).commit();
 
 
         }

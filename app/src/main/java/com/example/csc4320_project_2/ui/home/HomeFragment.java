@@ -150,7 +150,7 @@ public class HomeFragment extends Fragment {
                     );
 
                     DatabaseTrack track = null;
-
+                    // Play an audio file if database fragment passed one; Otherwise resort to default.
                     if (database_parcel != null) {
                         try {
                             track = new DatabaseTrack(getContext(), database_parcel.getFile_path());
