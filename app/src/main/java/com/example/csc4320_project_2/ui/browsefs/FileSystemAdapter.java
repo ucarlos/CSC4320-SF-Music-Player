@@ -1,8 +1,11 @@
 package com.example.csc4320_project_2.ui.browsefs;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,11 +50,15 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     private static String bop;
     public final String get_bop() { return bop; }
     public void set_bop(String str) { bop = str; }
-    /*
+
     private Bitmap music_icon;
     private Bitmap directory_icon;
+    private Bitmap error_icon;
+
+
+
     private ImageView fs_item_icon;
-     */
+
 
     /**
      * Provide a reference to the type of views that you are using
@@ -111,11 +118,11 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
                 }
             });
             textView =  view.findViewById(R.id.fs_item_name);
-            /*
+
             music_icon = BitmapFactory.decodeResource(view.getContext().getResources(), R.drawable.music_note_24px);
             directory_icon = BitmapFactory.decodeResource(view.getContext().getResources(), R.drawable.folder_24px);
-
-             */
+            fs_item_icon = view.findViewById(R.id.fs_item_icon);
+            error_icon = BitmapFactory.decodeResource(view.getContext().getResources(), R.drawable.ic_baseline_error_24);
 
         }
 
@@ -124,6 +131,9 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
             return textView;
         }
 
+        public ImageView getItemIcon() {
+            return fs_item_icon;
+        }
 
         /**
          * Determine the behavior when the user clicks on an item. The directory list will be
@@ -262,10 +272,19 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         // If the file is the parent of current file, then replace text with ..
         if (f.equals(current_file.getParentFile()))
             viewHolder.getTextView().setText(PARENT_DIRECTORY_STRING);
-        else if (f.getName() == CURRENT_DIRECTORY_STRING)
+        else if (f.getName() == CURRENT_DIRECTORY_STRING) {
             viewHolder.getTextView().setText("[FILE CANNOT BE READ.]");
-        else // Otherwise set it to the name of the file.
+            viewHolder.getItemIcon().setImageBitmap(error_icon);
+        }
+        else {// Otherwise set it to the name of the file.
             viewHolder.getTextView().setText(localDataSet.get(position).getName());
+
+            // Set bitmap depending on if it is a directory or not:
+            if (f.isDirectory())
+                viewHolder.getItemIcon().setImageBitmap(directory_icon);
+            else
+                viewHolder.getItemIcon().setImageBitmap(music_icon);
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -346,31 +365,31 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
     private synchronized void regenerate_dataset(List<File> dataset, List<File> new_list) throws InterruptedException {
 
         set_directory_status(Directory_Status.REMOVING_OLD_DATASET);
-        System.out.println("Adapter: Setting Directory Status to \"REMOVING OLD DATASET.");
-        System.out.println(get_directory_status().toString());
+        //System.out.println("Adapter: Setting Directory Status to \"REMOVING OLD DATASET.");
+        //System.out.println(get_directory_status().toString());
         // Wake up the Container:
         notifyAll();
 
         // Do nothing until the adapter is notified that the dataset has been cleared.
-        System.out.println("Adapter: Sleeping until Thread has removed the old dataset from the adapter.");
+        //System.out.println("Adapter: Sleeping until Thread has removed the old dataset from the adapter.");
         while (get_directory_status() == Directory_Status.REMOVING_OLD_DATASET) {
-            System.out.println("Adapter Directory Status: " + get_directory_status());
+            //System.out.println("Adapter Directory Status: " + get_directory_status());
             wait();
         }
 
-        System.out.println("Adapter: Waking up and clearing the old database to make room for the new database.");
+        //System.out.println("Adapter: Waking up and clearing the old database to make room for the new database.");
         // Now clear the database.
         dataset.clear();
         dataset.addAll(new_list);
         set_directory_status(Directory_Status.ADDING_NEW_DATASET);
         notifyAll();
 
-        System.out.println("Adapter: Sleeping until the Thread finishes adding the new dataset into the database.");
+        //System.out.println("Adapter: Sleeping until the Thread finishes adding the new dataset into the database.");
         while (get_directory_status() == Directory_Status.ADDING_NEW_DATASET)
             wait();
 
         // Now complete!
-        System.out.println("Adapter: Complete!");
+        //System.out.println("Adapter: Complete!");
     }
 
     /**

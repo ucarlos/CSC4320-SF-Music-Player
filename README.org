@@ -5,9 +5,10 @@
 * CSC 4320 Project: Android Music Player
 ** Description
 This contains the files needed for the final Project in CSC 4320 (Operating Systems).
+** Presentation Video
+** [[https://www.youtube.com/watch?v=zZAXos6wjSc]]
 ** Dependencies
 - [[http://www.jthink.net/jaudiotagger/][JThink was used for reading audio tags]]
-** Components
 ** Build Information
 As this application was made in Android Studio, You should be able to build and run this application if you import the project. Your mobile device should at least run Android 8.0 (For SDK 26)
 

@@ -34,10 +34,6 @@ public class DatabaseAdapter extends RecyclerView.Adapter<DatabaseAdapter.ViewHo
 
     // Constructor
 
-
-
-
-
     public DatabaseAdapter(List<DatabaseItem> data_set, Fragment frag){
         local_data_set = data_set;
         current_fragment = frag;
@@ -116,7 +112,6 @@ public class DatabaseAdapter extends RecyclerView.Adapter<DatabaseAdapter.ViewHo
             fragment.setArguments(bundle);
 
             // Now replace the current_fragment with one of home fragment.
-            // I believe that this WONT WORK.
 
             current_fragment.getFragmentManager().beginTransaction().replace(R.id.nav_host_fragment, fragment).commit();
 
