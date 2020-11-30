@@ -32,7 +32,8 @@ public class FileSystemFragment extends Fragment {
 
     private FileSystemViewModel fileSystemViewModel;
     private RecyclerView recyclerView;
-    private final String root_path = "/";
+    //private final String root_path = "/";
+    private final String root_path = "/sdcard/ExampleAudio";
     private Thread filesystem_adapter_thread;
     private static FileSystemAdapterContainer adapterContainer;
     private static Activity parent_activity;
@@ -60,7 +61,7 @@ public class FileSystemFragment extends Fragment {
             return temp;
         else {
             for (File f: list)
-                if (f.canRead() && !f.getName().contains("."))
+                if (f.canRead() && !f.isHidden())
                     temp.add(f);
 
         }
@@ -116,10 +117,10 @@ public class FileSystemFragment extends Fragment {
                     System.out.println("FS Adapter Thread: Attempt to run the UI Thread.");
                     // Now run on the UI Thread.
 
-                    //requireActivity().runOnUiThread(adapterContainer.getRunnable());
+                    requireActivity().runOnUiThread(adapterContainer.getRunnable());
                     //requireActivity().runOnUiThread(new FileSystemAdapterContainer.FileSystemAdapterRunnable(filesystem_adapter));
 
-                    adapterContainer.getRunnable().run();
+                    //adapterContainer.getRunnable().run();
 
                     System.out.println("FS Adapter Thread: Blocking util the Directory is ready again.");
                     // Now block until the directory is ready again.

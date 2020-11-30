@@ -43,8 +43,8 @@ public class DatabaseFragment extends Fragment {
         Cursor cursor = database.query(
                 DatabaseContract.TrackEntry.TABLE_NAME,   // The table to query
                 projection,             // The array of columns to return (pass null to get all)
-                selection,              // The columns for the WHERE clause
-                selection_args,          // The values for the WHERE clause
+                null,              // The columns for the WHERE clause
+                null,          // The values for the WHERE clause
                 null,                   // don't group the rows
                 null,                   // don't filter by row groups
                 SortOrder              // The sort order
@@ -56,7 +56,7 @@ public class DatabaseFragment extends Fragment {
             temp_list.add(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.TrackEntry.COLUMN_TRACK_NAME)));
             temp_list.add(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.TrackEntry.COLUMN_FILE_PATH)));
 
-            DatabaseItem item = new DatabaseItem((String[]) temp_list.toArray());
+            DatabaseItem item = new DatabaseItem((String[]) temp_list.toArray(new String[temp_list.size()]));
             list.add(item);
         }
 

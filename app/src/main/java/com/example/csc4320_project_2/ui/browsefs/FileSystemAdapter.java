@@ -203,8 +203,21 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         passed_file.isFile();
 
         localDataSet = dataSet;
+        // If filesystem cannot be accessed, simply do this.
+        if (localDataSet == null) {
+            localDataSet = new LinkedList<File>();
+            localDataSet.add(new File ("DUMMY FILE DOESNT EXIST"));
+            localDataSet.add(new File(CURRENT_DIRECTORY_STRING));
 
-        if (localDataSet.isEmpty()){
+            // Do not attempt to pass a parent file if the file cannot be acessed.
+            current_file = passed_file;
+            parent_file = passed_file.getParentFile();
+
+            return;
+        }
+
+
+        if (localDataSet.isEmpty()) {
             // Add a single item stating that the filesystem is empty, represented by
             // the character '.' which is the same as in linux.
             // There will always be a single item in the dataset, representing the current directory.
@@ -249,6 +262,8 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         // If the file is the parent of current file, then replace text with ..
         if (f.equals(current_file.getParentFile()))
             viewHolder.getTextView().setText(PARENT_DIRECTORY_STRING);
+        else if (f.getName() == CURRENT_DIRECTORY_STRING)
+            viewHolder.getTextView().setText("[FILE CANNOT BE READ.]");
         else // Otherwise set it to the name of the file.
             viewHolder.getTextView().setText(localDataSet.get(position).getName());
     }
@@ -320,8 +335,8 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         //localDataSet = temp_list;
 
 
-        regenerate_dataset(container.dataset, temp_list);
-        //regenerate_dataset_spinlock(container.dataset, temp_list);
+        //regenerate_dataset(container.dataset, temp_list);
+        regenerate_dataset_spinlock(container.dataset, temp_list);
 
         // Now set false.
         //setHasClicked(false);

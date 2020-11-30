@@ -99,7 +99,7 @@ public class DatabaseAdapter extends RecyclerView.Adapter<DatabaseAdapter.ViewHo
             DatabaseItem databaseItem = container.get_container_list().get(element_index);
             // Now send the file somehow?
             // Return any
-            if (databaseItem.equals(new DatabaseItem())){
+            if (databaseItem.equals(new DatabaseItem()) || databaseItem.get_file_path().equals("")){
                 return;
             }
 
@@ -117,8 +117,8 @@ public class DatabaseAdapter extends RecyclerView.Adapter<DatabaseAdapter.ViewHo
 
             // Now replace the current_fragment with one of home fragment.
             // I believe that this WONT WORK.
-            current_fragment.getFragmentManager().beginTransaction().replace(R.id.nav_gallery, fragment).commit();
 
+            current_fragment.getFragmentManager().beginTransaction().replace(R.id.nav_host_fragment, fragment).commit();
 
         }
 

@@ -61,13 +61,15 @@ public class FileSystemAdapterContainer {
             // Add all items from list corresponding to new directory
             // Set variable back to false and sleep.
                 System.out.println("FSAdapterContainer: Will the user ever click?");
+
+                /*
                 try {
                     repopulate_items();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-                //repopulate_items_spinlock();
+    */
+                repopulate_items_spinlock();
 
             }
 
@@ -116,7 +118,7 @@ public class FileSystemAdapterContainer {
         }
 
         /**
-         * Spinlock version of repopulate_items(). Horribly Ineffiecent.
+         * Spinlock version of repopulate_items(). Horribly Inefficient
          */
         public void repopulate_items_spinlock() {
             FileSystemAdapter adapter = getLocaladapter();
