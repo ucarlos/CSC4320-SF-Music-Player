@@ -28,7 +28,7 @@ public class FileParcel implements Parcelable {
         }
     };
 
-    public String getFile_path() {
+    public String get_file_path() {
         return file_path;
     }
 
@@ -51,7 +51,7 @@ public class FileParcel implements Parcelable {
 
     @Override
     public void writeToParcel(@NotNull Parcel dest, int i) {
-        dest.writeString(getFile_path());
+        dest.writeString(get_file_path());
     }
 
     private void readFromParcel(@NotNull Parcel in){

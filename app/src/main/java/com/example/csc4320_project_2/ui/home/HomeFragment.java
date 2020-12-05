@@ -1,6 +1,8 @@
 package com.example.csc4320_project_2.ui.home;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -9,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,19 +24,27 @@ import com.example.csc4320_project_2.R;
 import com.example.csc4320_project_2.sqlite.DatabaseTrack;
 import com.example.csc4320_project_2.ui.database.FileParcel;
 
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.images.Artwork;
+import org.jaudiotagger.tag.images.ArtworkFactory;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
+
 
 public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
     private MediaPlayer media_player = null;
+    private ImageView track_artwork_view;
+    private Bitmap track_bitmap;
     private static FileParcel database_parcel;
     // Enum to handle playback
     public enum PlaybackStatus {INITIAL, IS_PLAYING, IS_PAUSED, STOPPED }
@@ -46,6 +57,7 @@ public class HomeFragment extends Fragment {
 
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         final TextView textView = root.findViewById(R.id.text_audio_track);
+        track_artwork_view = root.findViewById(R.id.audio_track_artwork);
 
         // Retrieve Bundle from DatabaseFragment
         Bundle bundle = this.getArguments();
@@ -58,10 +70,39 @@ public class HomeFragment extends Fragment {
         }
         */
 
+        // Set the default album art from a bitmap in drawable:
+        track_bitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
+
         // Set the parcel to null or not depending on whether database_fragment sent a audio path or not.
         database_parcel = (bundle != null) ? bundle.getParcelable("audio_path") : null;
 
+        // Prevent the user from playing a file that is removed or deleted by setting bundle to null.
+        // This will cause the application to default to the default track. Ideally, I'd like to write
+        // a notification stating that the file could not be read, but I've run out of time
 
+        // Default Bitmap for audio file.
+        //BitmapFactory.Options options = new BitmapFactory.Options();
+        track_bitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
+
+
+        // Does not work
+
+        if (database_parcel != null){
+            File audio_file = new File(database_parcel.get_file_path());
+            if (audio_file.exists()) {
+                try {
+                    track_bitmap = set_track_artwork(root, audio_file);
+                } catch (TagException | ReadOnlyFileException | CannotReadException |
+                        IOException | InvalidAudioFrameException e) {
+                    track_bitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
+                }
+            }
+            else database_parcel = null;
+        }
+
+
+        // Now apply the track artwork:
+        track_artwork_view.setImageBitmap(Bitmap.createScaledBitmap(track_bitmap, 400, 400, false));
 
 
         // TextViews
@@ -153,7 +194,7 @@ public class HomeFragment extends Fragment {
                     // Play an audio file if database fragment passed one; Otherwise resort to default.
                     if (database_parcel != null) {
                         try {
-                            track = new DatabaseTrack(getContext(), database_parcel.getFile_path());
+                            track = new DatabaseTrack(getContext(), database_parcel.get_file_path());
                         } catch (IOException | CannotReadException | ReadOnlyFileException | TagException | InvalidAudioFrameException e) {
                             e.printStackTrace();
                         }
@@ -165,6 +206,8 @@ public class HomeFragment extends Fragment {
                             e.printStackTrace();
                         }
                     }
+
+
 
                     assert track != null;
                     Uri audio_uri = Uri.fromFile(track.get_file());
@@ -237,6 +280,27 @@ public class HomeFragment extends Fragment {
         });
         return root;
 
+
+    }
+
+    /**
+     * Sets the artwork of the audio track to the artwork found in the metadata. If none is found,
+     * Simply display the default artwork.
+     * @param audio_file: The audio file constructed from the string sent by the FileParcel
+     */
+    public Bitmap set_track_artwork(View view, File audio_file) throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
+
+        if (audio_file == null || !audio_file.exists())
+            return BitmapFactory.decodeResource(view.getResources(), R.drawable.test);
+
+        AudioFile audioFile = AudioFileIO.read(audio_file);
+        Tag tag = audioFile.getTag();
+        if (tag.hasField(FieldKey.COVER_ART)){
+            byte[] byte_array = tag.getFirstArtwork().getBinaryData();
+            return BitmapFactory.decodeByteArray(byte_array, 0, byte_array.length);
+        }
+        else
+            return BitmapFactory.decodeResource(view.getResources(), R.drawable.test);
 
     }
 

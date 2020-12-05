@@ -61,6 +61,8 @@ public class DatabaseTrack {
         // Setup the database:
         database_helper = new DatabaseContract.TrackEntryDBHelper(passed_context);
 
+
+
     }
 
     public DatabaseTrack(Context context, String file_path) throws TagException,
@@ -85,6 +87,9 @@ public class DatabaseTrack {
         is_invalid = false;
         this.file_path = passed_file.getAbsolutePath();
         audio_file = AudioFileIO.read(passed_file);
+
+        // Now extract the artwork file if possible:
+
     }
 
 
@@ -168,6 +173,7 @@ public class DatabaseTrack {
     private final String file_path;
     private final AudioFile audio_file;
     private final File file;
+
     private final boolean is_invalid;
     private final Context passed_context;
 }
