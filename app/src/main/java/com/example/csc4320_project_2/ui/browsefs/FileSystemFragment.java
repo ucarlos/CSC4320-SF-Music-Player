@@ -32,7 +32,7 @@ public class FileSystemFragment extends Fragment {
 
     private FileSystemViewModel fileSystemViewModel;
     private RecyclerView recyclerView;
-    //private final String root_path = "/";
+    //private final String root_path = "/sdcard";
     private final String root_path = "/sdcard/ExampleAudio";
     private Thread filesystem_adapter_thread;
     private static FileSystemAdapterContainer adapterContainer;

@@ -216,7 +216,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         // If filesystem cannot be accessed, simply do this.
         if (localDataSet == null) {
             localDataSet = new LinkedList<File>();
-            localDataSet.add(new File ("DUMMY FILE DOESNT EXIST"));
+            localDataSet.add(new File ("[CANNOT OPEN FILE]"));
             localDataSet.add(new File(CURRENT_DIRECTORY_STRING));
 
             // Do not attempt to pass a parent file if the file cannot be acessed.
@@ -402,7 +402,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         set_directory_status(Directory_Status.REMOVING_OLD_DATASET);
         System.out.println("Adapter: Setting Directory Status to \"REMOVING OLD DATASET.");
         System.out.println(get_directory_status().toString());
-        set_bop("SONICBOOM!");
+        //set_bop("SONICBOOM!");
         while (get_directory_status() == Directory_Status.REMOVING_OLD_DATASET) {
             continue;
         }
