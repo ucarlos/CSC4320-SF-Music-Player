@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.csc4320_project_2.R;
+import com.example.csc4320_project_2.sqlite.DatabaseContract;
 import com.example.csc4320_project_2.ui.home.HomeFragment;
 
 import java.util.List;
@@ -98,6 +99,12 @@ public class DatabaseAdapter extends RecyclerView.Adapter<DatabaseAdapter.ViewHo
             if (databaseItem.equals(new DatabaseItem()) || databaseItem.get_file_path().equals("")){
                 return;
             }
+
+            //
+            System.out.println("----------------------------------------------------------------");
+            System.out.println("Schema:");
+            System.out.println(DatabaseContract.getSqlCreateEntries());
+            System.out.println("----------------------------------------------------------------");
 
             // Prepare a fragment with a parcel containing the audio file path:
             String file_path = databaseItem.get_file_path();

@@ -42,8 +42,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
     @RequiresApi(api = Build.VERSION_CODES.O)
-    protected void testDatabaseTag() throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
+    private void testDatabaseTag() throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
         System.out.println("****************************************************************");
         System.out.println("TESTING DATABASE TAG!");
         System.out.println("****************************************************************");

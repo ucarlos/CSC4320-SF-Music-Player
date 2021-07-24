@@ -17,7 +17,7 @@ public class DatabaseContract {
 
     // To prevent someone from accidentally instantiating the contract class,
     // make the constructor private.
-    private DatabaseContract() {}
+    private DatabaseContract() { }
 
     /* Inner class that defines the table contents */
     public static class TrackEntry implements BaseColumns {
@@ -33,17 +33,21 @@ public class DatabaseContract {
         public static final String COLUMN_IS_INVALID_TRACK = "is_invalid_track";
     }
 
+    public static String getSqlCreateEntries() { return SQL_CREATE_ENTRIES; }
+
     private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + TrackEntry.TABLE_NAME + " (" +
-                    TrackEntry._ID + " INTEGER PRIMARY KEY," +
-                    TrackEntry.COLUMN_TRACK_NAME + " TEXT," +
-                    TrackEntry.COLUMN_TRACK_NUMBER + " INTEGER," +
-                    TrackEntry.COLUMN_ARTIST_NAME + " TEXT," +
-                    TrackEntry.COLUMN_ALBUM_ARTIST_NAME + " TEXT," +
-                    TrackEntry.COLUMN_ALBUM_NAME + " TEXT," +
-                    TrackEntry.COLUMN_YEAR + " INTEGER," +
-                    TrackEntry.COLUMN_FILE_PATH + " TEXT," +
-                    TrackEntry.COLUMN_IS_INVALID_TRACK + " INTEGER)";
+            "CREATE TABLE IF NOT EXISTS " + TrackEntry.TABLE_NAME + " ("
+            + TrackEntry._ID + ","
+            + TrackEntry.COLUMN_TRACK_NAME + " TEXT,"
+            + TrackEntry.COLUMN_TRACK_NUMBER + " INTEGER,"
+            + TrackEntry.COLUMN_ARTIST_NAME + " TEXT, "
+            + TrackEntry.COLUMN_ALBUM_ARTIST_NAME + " TEXT, "
+            + TrackEntry.COLUMN_ALBUM_NAME + " TEXT, "
+            + TrackEntry.COLUMN_YEAR + " INTEGER, "
+            + TrackEntry.COLUMN_FILE_PATH + " TEXT UNIQUE,"
+            + TrackEntry.COLUMN_IS_INVALID_TRACK + " INTEGER,"
+            + "PRIMARY KEY (" + TrackEntry._ID + ", " + TrackEntry.COLUMN_FILE_PATH + "))";
+
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TrackEntry.TABLE_NAME;

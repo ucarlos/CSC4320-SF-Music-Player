@@ -25,6 +25,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Subclass of RecyclerView.Adapter that displays audio files and directories
+ * in a given directory.
+ */
 public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.ViewHolder> {
 
     private static List<File> localDataSet;
@@ -101,7 +105,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
                      */
                     //setHasClicked(true);
-                    // If you're at the root directoy, there is no parent file that be shown.
+                    // If you're at the root directory, there is no parent file that be shown.
                     // Instead, clicking on each item will move you to that directory.
 
                     // If for some reason, the root directory is empty, then the constructor
@@ -357,6 +361,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         //regenerate_dataset(container.dataset, temp_list);
         regenerate_dataset_spinlock(container.dataset, temp_list);
 
+
         // Now set false.
         //setHasClicked(false);
 
@@ -402,7 +407,7 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         set_directory_status(Directory_Status.REMOVING_OLD_DATASET);
         System.out.println("Adapter: Setting Directory Status to \"REMOVING OLD DATASET.");
         System.out.println(get_directory_status().toString());
-        //set_bop("SONICBOOM!");
+
         while (get_directory_status() == Directory_Status.REMOVING_OLD_DATASET) {
             continue;
         }

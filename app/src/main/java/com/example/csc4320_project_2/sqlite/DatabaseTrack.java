@@ -115,12 +115,9 @@ public class DatabaseTrack {
 
     }
 
-    /*
-     * -----------------------------------------------------------------------------
-     * insert_into_database(): Insert all applicable tags from AudioFile into
-     * the SQLite Database.
-     *
-     * -----------------------------------------------------------------------------
+
+    /**
+     * Insert all applicable tags from AudioFile into the SQLite Database.
      */
     public void database_insert() {
         SQLiteDatabase database = database_helper.getWritableDatabase();

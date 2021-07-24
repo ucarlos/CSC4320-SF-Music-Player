@@ -21,7 +21,10 @@ import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 
-
+/**
+ * Subclass of Fragment that represents FileSystem Navigation.
+ *
+ */
 public class FileSystemFragment extends Fragment {
 
     // The File Manager will only display files with the following file extentions,
@@ -33,14 +36,14 @@ public class FileSystemFragment extends Fragment {
     private FileSystemViewModel fileSystemViewModel;
     private RecyclerView recyclerView;
     //private final String root_path = "/sdcard";
-    private final String root_path = "/sdcard/ExampleAudio";
+    private final String ROOT_PATH = "/sdcard/ExampleAudio";
     private Thread filesystem_adapter_thread;
     private static FileSystemAdapterContainer adapterContainer;
     private static Activity parent_activity;
     private LinkedList<File> populate_root_directory(){
         LinkedList<File> temp = new LinkedList<File>();
 
-        File directory = new File(root_path);
+        File directory = new File(ROOT_PATH);
         if (!directory.isDirectory()){
             System.out.println("This is NOT a directory!");
             return null;
@@ -81,7 +84,7 @@ public class FileSystemFragment extends Fragment {
         // Set up RecyclerView:
 
         LinkedList<File> list = populate_root_directory();
-        File new_file = new File(root_path);
+        File new_file = new File(ROOT_PATH);
         FileSystemAdapter filesystem_adapter = new FileSystemAdapter(list, new_file);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
 

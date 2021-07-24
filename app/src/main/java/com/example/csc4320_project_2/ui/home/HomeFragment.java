@@ -32,8 +32,6 @@ import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.tag.images.Artwork;
-import org.jaudiotagger.tag.images.ArtworkFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,13 +40,20 @@ import java.io.IOException;
 public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
-    private MediaPlayer media_player = null;
-    private ImageView track_artwork_view;
-    private Bitmap track_bitmap;
-    private static FileParcel database_parcel;
+    private MediaPlayer mediaPlayer = null;
+    private ImageView trackArtworkView;
+    private Bitmap trackBitmap;
+    private static FileParcel databaseParcel;
+    private TextView audioLengthText;
+    private Thread audioThread;
+    private Button audioButton;
+    private TextView artistText;
+    private TextView trackName;
     // Enum to handle playback
     public enum PlaybackStatus {INITIAL, IS_PLAYING, IS_PAUSED, STOPPED }
-    PlaybackStatus audio_button_status = PlaybackStatus.INITIAL;
+
+    private PlaybackStatus audioButtonStatus = PlaybackStatus.INITIAL;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -57,24 +62,16 @@ public class HomeFragment extends Fragment {
 
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         final TextView textView = root.findViewById(R.id.text_audio_track);
-        track_artwork_view = root.findViewById(R.id.audio_track_artwork);
+        trackArtworkView = root.findViewById(R.id.audio_track_artwork);
 
         // Retrieve Bundle from DatabaseFragment
         Bundle bundle = this.getArguments();
-        /*
-        if (bundle != null){
-            database_parcel = bundle.getParcelable("audio_path");
-        }
-        else {
-            database_parcel = null;
-        }
-        */
 
         // Set the default album art from a bitmap in drawable:
-        track_bitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
+        trackBitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
 
         // Set the parcel to null or not depending on whether database_fragment sent a audio path or not.
-        database_parcel = (bundle != null) ? bundle.getParcelable("audio_path") : null;
+        databaseParcel = (bundle != null) ? bundle.getParcelable("audio_path") : null;
 
         // Prevent the user from playing a file that is removed or deleted by setting bundle to null.
         // This will cause the application to default to the default track. Ideally, I'd like to write
@@ -82,190 +79,83 @@ public class HomeFragment extends Fragment {
 
         // Default Bitmap for audio file.
         //BitmapFactory.Options options = new BitmapFactory.Options();
-        track_bitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
+        trackBitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
 
 
         // Does not work
 
-        if (database_parcel != null){
-            File audio_file = new File(database_parcel.get_file_path());
+        if (databaseParcel != null){
+            File audio_file = new File(databaseParcel.get_file_path());
             if (audio_file.exists()) {
                 try {
-                    track_bitmap = set_track_artwork(root, audio_file);
+                    trackBitmap = SetTrackArtwork(root, audio_file);
                 } catch (TagException | ReadOnlyFileException | CannotReadException |
                         IOException | InvalidAudioFrameException e) {
-                    track_bitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
+                    trackBitmap = BitmapFactory.decodeResource(root.getResources(), R.drawable.test);
                 }
             }
-            else database_parcel = null;
+            else databaseParcel = null;
         }
 
 
         // Now apply the track artwork:
-        track_artwork_view.setImageBitmap(Bitmap.createScaledBitmap(track_bitmap, 400, 400, false));
+        trackArtworkView.setImageBitmap(Bitmap.createScaledBitmap(trackBitmap,
+                400, 400, false));
 
 
         // TextViews
-        TextView track_name = root.findViewById(R.id.text_audio_track);
-        track_name.setText(R.string.default_audio_track);
-        TextView audio_length_text = root.findViewById(R.id.text_audio_duration);
-        audio_length_text.setVisibility(View.VISIBLE);
-        TextView artist_text = root.findViewById(R.id.text_audio_artist);
+        trackName = root.findViewById(R.id.text_audio_track);
+        trackName.setText(R.string.default_audio_track);
+        audioLengthText = root.findViewById(R.id.text_audio_duration);
+        audioLengthText.setVisibility(View.VISIBLE);
+        artistText = root.findViewById(R.id.text_audio_artist);
 
         //audio_length_text.setGravity(View.TEXT_ALIGNMENT_CENTER);
 
         // Thread to monitor audio playback:
         // It basically waits loops until Audio playback starts, and
-        new Thread(new Runnable() {
-
-            @SuppressLint("DefaultLocale")
-            public String create_audio_duration(long current_audio_in_sec,
-                                                long max_audio_in_sec) {
-
-                return String.format("%02d:%02d / %02d:%02d",
-                        current_audio_in_sec / 60,
-                        current_audio_in_sec % 60,
-                        max_audio_in_sec / 60,
-                        max_audio_in_sec % 60);
-
-            }
-
-
-            @Override
-            public void run() {
-                long max_audio_duration_milisec = -1;
-                // Current audio position in miliseconds and seconds respectively.
-                long current_audio_position_milisec = -1;
-                while (true) {
-                    while (audio_button_status == PlaybackStatus.INITIAL)
-                        continue; // Do nothing
-
-                    max_audio_duration_milisec = media_player.getDuration();
-                    //audio_length_text.setVisibility(View.VISIBLE);
-                    String audio_position;
-                    // Print the audio elapsed time
-                    do {
-                        if (audio_button_status == PlaybackStatus.IS_PAUSED)
-                            continue;
-                        else if (audio_button_status == PlaybackStatus.STOPPED)
-                            break;
-                        else {
-                            current_audio_position_milisec = media_player.getCurrentPosition();
-                            // Wait a second
-                            String text = create_audio_duration(current_audio_position_milisec / 1000,
-                                    max_audio_duration_milisec / 1000);
-                            audio_length_text.setText(text);
-                        }
-                    } while (current_audio_position_milisec < max_audio_duration_milisec);
-
-
-                    // Now release the media_player and set everything back to normal.
-                    // Set audio to stopped if it hasn't already
-                    audio_button_status = PlaybackStatus.STOPPED;
-                    media_player.reset();
-                    media_player.release();
-                    media_player = null;
-                    audio_button_status = PlaybackStatus.INITIAL;
-
-                    //audio_length_text.setVisibility(View.INVISIBLE);
-                }
-            }
-        }).start();
+        audioThread = new Thread(new AudioPlayback());
+        audioThread.start();
 
 
         // Button Code
-        Button audio_button = root.findViewById(R.id.audio_play_button);
+        audioButton = root.findViewById(R.id.audio_play_button);
 
-        audio_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (audio_button_status == PlaybackStatus.INITIAL) {
-                    System.out.println("INITIAL STATE");
-                    // Prepare a thread to play audio.
-                    media_player = new MediaPlayer();
-                    media_player.setAudioAttributes(
-                            new AudioAttributes.Builder()
-                                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                                    .build()
-                    );
+        audioButton.setOnClickListener(new View.OnClickListener() {
 
-                    DatabaseTrack track = null;
-                    // Play an audio file if database fragment passed one; Otherwise resort to default.
-                    if (database_parcel != null) {
-                        try {
-                            track = new DatabaseTrack(getContext(), database_parcel.get_file_path());
-                        } catch (IOException | CannotReadException | ReadOnlyFileException | TagException | InvalidAudioFrameException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    else {
-                        try {
-                            track = new DatabaseTrack(getContext());
-                        } catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-
-
-                    assert track != null;
-                    Uri audio_uri = Uri.fromFile(track.get_file());
-
-                    try {
-                        media_player.setDataSource(getContext(), audio_uri);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    // Prepare Asynchronously by creating a worker thread.
-                    try {
-                        media_player.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Change the textview containing track name:
-
-                    // Now play audio:
-                    audio_button_status = PlaybackStatus.IS_PLAYING;
-                    String title = track.get_audio_file().getTag().getFirst(FieldKey.TITLE);
-                    audio_button.setText(getString(R.string.audio_pause));
-                    artist_text.setText(track.get_audio_file().getTag().getFirst(FieldKey.ARTIST));
-                    track_name.setText(title);
-                    System.out.println("NOW PLAYING");
-                    media_player.start();
-
+            @Override public void onClick(View view) {
+                if (audioButtonStatus == PlaybackStatus.INITIAL) {
+                    runInitialAudioBehavior();
                 }
-                else if (audio_button_status == PlaybackStatus.IS_PLAYING){
+                else if (audioButtonStatus == PlaybackStatus.IS_PLAYING){
                     // Pause audio if it is playing.
-                    audio_button.setText(getString(R.string.audio_play));
-                    audio_button_status = PlaybackStatus.IS_PAUSED;
-                    media_player.pause();
+                    audioButton.setText(getString(R.string.audio_play));
+                    audioButtonStatus = PlaybackStatus.IS_PAUSED;
+                    mediaPlayer.pause();
 
                 }
-                else if (audio_button_status == PlaybackStatus.IS_PAUSED){
+                else if (audioButtonStatus == PlaybackStatus.IS_PAUSED){
                     // Resume audio if currently paused.
-                    audio_button.setText(getString(R.string.audio_pause));
+                    audioButton.setText(getString(R.string.audio_pause));
 
-                    audio_button_status = PlaybackStatus.IS_PLAYING;
-                    media_player.start();
+                    audioButtonStatus = PlaybackStatus.IS_PLAYING;
+                    mediaPlayer.start();
                 }
 
                 // Deallocate all media_player details if playback has stopped.
-
             }
 
         });
 
-        // Handles Stopping Audioplayback if the user clicks and holds for three seconds:
-        audio_button.setOnLongClickListener(new View.OnLongClickListener() {
+        // Handles Stopping Audio playback if the user clicks and holds for three seconds:
+        audioButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 // Stop Playback Immediately.
-                if (audio_button_status != PlaybackStatus.INITIAL){
-                    media_player.stop();
-                    audio_button_status = PlaybackStatus.STOPPED;
-                    audio_button.setText(R.string.audio_play);
+                if (audioButtonStatus != PlaybackStatus.INITIAL){
+                    mediaPlayer.stop();
+                    audioButtonStatus = PlaybackStatus.STOPPED;
+                    audioButton.setText(R.string.audio_play);
                     return true;
                 }
                 return false;
@@ -284,11 +174,76 @@ public class HomeFragment extends Fragment {
     }
 
     /**
+     * Function for Default Audio Behavior
+     */
+    private void runInitialAudioBehavior() {
+        System.out.println("INITIAL STATE");
+        // Prepare a thread to play audio.
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioAttributes(
+                new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+        );
+
+        DatabaseTrack track = null;
+        // Play an audio file if database fragment passed one; Otherwise resort to default.
+        if (databaseParcel != null) {
+            try {
+                track = new DatabaseTrack(getContext(), databaseParcel.get_file_path());
+            }
+            catch (IOException | CannotReadException | ReadOnlyFileException | TagException | InvalidAudioFrameException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            try {
+                track = new DatabaseTrack(getContext());
+            }
+            catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
+                e.printStackTrace();
+            }
+        }
+
+        assert track != null;
+        Uri audioUri = Uri.fromFile(track.get_file());
+
+        try {
+            mediaPlayer.setDataSource(getContext(), audioUri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // Prepare Asynchronously by creating a worker thread.
+        try {
+            mediaPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Change the textview containing track name:
+
+        // Now play audio:
+        audioButtonStatus = PlaybackStatus.IS_PLAYING;
+        String title = track.get_audio_file().getTag().getFirst(FieldKey.TITLE);
+        audioButton.setText(getString(R.string.audio_pause));
+        artistText.setText(track.get_audio_file().getTag().getFirst(FieldKey.ARTIST));
+        trackName.setText(title);
+        System.out.println("NOW PLAYING");
+        mediaPlayer.start();
+
+    }
+
+    /**
      * Sets the artwork of the audio track to the artwork found in the metadata. If none is found,
      * Simply display the default artwork.
      * @param audio_file: The audio file constructed from the string sent by the FileParcel
      */
-    public Bitmap set_track_artwork(View view, File audio_file) throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
+    public Bitmap SetTrackArtwork(View view, File audio_file) throws TagException,
+            ReadOnlyFileException,
+            CannotReadException,
+            InvalidAudioFrameException,
+            IOException {
 
         if (audio_file == null || !audio_file.exists())
             return BitmapFactory.decodeResource(view.getResources(), R.drawable.test);
@@ -301,6 +256,73 @@ public class HomeFragment extends Fragment {
         }
         else
             return BitmapFactory.decodeResource(view.getResources(), R.drawable.test);
+
+    }
+
+
+    /**
+     * Inner Class that handles Audio Playback and Displaying the Current
+     * Time Duration.
+     */
+    private class AudioPlayback implements Runnable {
+            @SuppressLint("DefaultLocale")
+            public String createAudioDuration(long CurrentAudioTimeInSec,
+                                              long MaxAudioTimeInSec) {
+
+                return String.format("%02d:%02d / %02d:%02d",
+                        CurrentAudioTimeInSec / 60,
+                        CurrentAudioTimeInSec % 60,
+                        MaxAudioTimeInSec / 60,
+                        MaxAudioTimeInSec % 60);
+            }
+
+        @Override public void run() {
+            // Wait time:
+            long waitTimeinMiliseconds = 600;
+            long MaxAudioTimeInMiliseconds = -1;
+            // Current audio position in miliseconds and seconds respectively.
+            long CurrentAudioTimeInMiliSeconds = -1;
+
+            while (true) {
+                while (audioButtonStatus == PlaybackStatus.INITIAL)
+                    continue; // Do nothing
+
+                MaxAudioTimeInMiliseconds = mediaPlayer.getDuration();
+                //audio_length_text.setVisibility(View.VISIBLE);
+                // Print the audio elapsed time
+                do {
+                    if (audioButtonStatus == PlaybackStatus.IS_PAUSED)
+                        continue;
+                    else if (audioButtonStatus == PlaybackStatus.STOPPED)
+                        break;
+                    else {
+                        CurrentAudioTimeInMiliSeconds = mediaPlayer.getCurrentPosition();
+
+                        String text = createAudioDuration(CurrentAudioTimeInMiliSeconds / 1000,
+                                MaxAudioTimeInMiliseconds / 1000);
+                        audioLengthText.setText(text);
+
+                        // Now wait half a second in order to prevent hogging the CPU.
+                        try {
+                            Thread.sleep(waitTimeinMiliseconds);
+                        }
+                        catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } while (CurrentAudioTimeInMiliSeconds < MaxAudioTimeInMiliseconds);
+
+
+                // Now release the media_player and set everything back to normal.
+                // Set audio to stopped if it hasn't already
+                audioButtonStatus = PlaybackStatus.STOPPED;
+                mediaPlayer.reset();
+                mediaPlayer.release();
+                mediaPlayer = null;
+                audioButtonStatus = PlaybackStatus.INITIAL;
+            }
+
+        }
 
     }
 

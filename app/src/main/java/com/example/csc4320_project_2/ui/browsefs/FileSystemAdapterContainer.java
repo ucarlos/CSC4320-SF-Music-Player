@@ -10,8 +10,10 @@ package com.example.csc4320_project_2.ui.browsefs;
  * -----------------------------------------------------------------------------
  */
 
-
-
+/**
+ * Class that dontains a reference to a FileSystemAdapter and makes sure that its
+ * items are recreated when the user switches directories.
+ */
 public class FileSystemAdapterContainer {
     public static final FileSystemAdapter getFileSystemAdapter() {
         return adapter;
@@ -36,7 +38,7 @@ public class FileSystemAdapterContainer {
         runnable = new FileSystemAdapterRunnable();
     }
 
-    public static class FileSystemAdapterRunnable implements Runnable {
+    private static class FileSystemAdapterRunnable implements Runnable {
         private boolean do_stop = false;
         private FileSystemAdapter fsadapter;
 
